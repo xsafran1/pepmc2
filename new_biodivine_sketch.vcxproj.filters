@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="paramset.hpp" />
+    <ClInclude Include="buchi_automaton.hpp" />
+    <ClInclude Include="model.hpp" />
+    <ClInclude Include="bio_parser.hpp" />
+    <ClInclude Include="state_space.hpp" />
+    <ClInclude Include="sync_flag.hpp" />
+    <ClInclude Include="lock_free_queue.hpp" />
+    <ClInclude Include="succ.hpp" />
+    <ClInclude Include="sync_counter.hpp" />
+    <ClInclude Include="cas.hpp" />
+    <ClInclude Include="transitional_state_space.hpp" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,28 @@
+VARS:pRB,E2F1
+
+k1deg = 0.1
+kp = 0.05
+k2prod = 1.6
+k1prod = 1
+
+PARAMS:phi,0.01,1
+#phi = 0.03
+
+Km1 = 0.5
+Km2 = 4
+a = 0.04
+J11 = 0.5
+J12 = 5
+
+EQ:dpRB  = -phi*pRB + k1prod*(0.85*rampplus(E2F1,0,3)+0.1*rampplus(E2F1,3,10)+0.05*rampplus(E2F1,10,50))*(1-(0.85*rampplus(pRB,0,2)+0.1*rampplus(pRB,2,5)+0.05*rampplus(pRB,5,80)))
+EQ:dE2F1 = -k1deg*E2F1 + kp + k2prod*(0.85*rampplus(E2F1,0,10)+0.1*rampplus(E2F1,10,20)+0.05*rampplus(E2F1,20,80))*(1-(0.5*rampplus(pRB,0,5)+0.2*rampplus(pRB,5,10)+0.15*rampplus(pRB,10,30)+0.15*rampplus(pRB,30,130)))
+
+#INIT:0,2;0,2
+
+THRES:pRB:0,2.5,150
+THRES:E2F1:0,100
+
+# [fm > 0.005] FG(E2F1 > 8)
+A=E2F1<8
+BA::,0;A,1
+BA:F:,0;A,1

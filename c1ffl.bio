@@ -1,0 +1,24 @@
+VARS:X,Y,Z
+PARAMS:p,0,10
+
+EQ:dX = p + -0.1*X
+EQ:dY = rp(X,4.9,5.1) + -0.1*Y
+EQ:dZ = rp(X,4.9,5.1)*rn(Y,4.9,5.1) + -0.1*Z
+
+THRES:X:0,10
+THRES:Y:0,10
+THRES:Z:0,10
+
+INIT:0,10;0,10;0,10
+
+MACRO:thr:4.9
+
+MACRO:a:X<4.9
+MACRO:b:Y<4.9
+MACRO:c:Z<4.9
+
+#(a && b && c) -> (c && b) U [(c && !b) U (!c && !b)]
+BA:F:a&b&c,1
+BA:F:b|c,1;b&!c,3;!b&c,2
+BA:F:c,2;b,3
+BA:F:,3

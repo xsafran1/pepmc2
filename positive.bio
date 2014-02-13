@@ -1,0 +1,17 @@
+VARS:X
+
+g=0.1
+
+PARAMS:k,0,20
+
+theta1=4.9
+theta2=5.1
+
+EQ:dX = k*rp(X,theta1,theta2) + -g*X
+
+THRES:X:0,10
+INIT:0,10
+
+BA::,0;!X<4.9,1
+BA:F:!X<4.9,1
+

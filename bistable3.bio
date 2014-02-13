@@ -1,0 +1,41 @@
+VARS:X,Y0,Y3,Y4
+PARAMS:p,0,1.1
+EQ:X = p*rp(Y0,4.9,5.1) + -0.1*X
+EQ:dY0 = rp(Y3,4.9,5.1) + -0.1*Y0
+EQ:dY3 = rp(Y4,4.9,5.1) + -0.1*Y3
+EQ:dY4 = rp(X,4.9,5.1) + -0.1*Y4
+THRES:X:0,10
+THRES:Y0:0,10
+THRES:Y1:0,10
+THRES:Y2:0,10
+THRES:Y3:0,10
+THRES:Y4:0,10
+
+#INIT:5.1,10;5.1,10;5.1,10;5.1,10
+
+FAIR:0,4.9;0,4.9;0,4.9;0,4.9
+FAIR:5.1,10;5.1,10;5.1,10;5.1,10
+
+SCH:0::monostable:1:
+SCH:1::monostable:2:
+SCH:2::mono+userfairness:3:
+SCH:3::mono+userfairness::invalid
+
+a=X<4.9
+b=X<5.1
+
+# FG(X < 4.9)
+BA:0::,0;!a,1
+BA:0:F:,0;!a,1
+
+# FG(X > 5.1)
+BA:1::,0;b,1
+BA:1:F:,0;b,1
+
+# FG(X > 4.9)
+BA:2::,0;a,1
+BA:2:F:,0;a,1
+
+# FG(X < 5.1)
+BA:3::,0;!b,1
+BA:3:F:,0;!b,1

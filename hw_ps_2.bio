@@ -1,0 +1,77 @@
+VARS:NH3ex,NH4ex,AmtB,AmtBNH3,AmtBNH4,NH3in,NH4in
+
+k1=50000000
+k2=5000
+k3=50
+k4=50
+k5=80
+k6=30014000
+k7=562000
+k8=14000
+k9=14000
+k10=30000000
+
+
+#PARAMS:k4,1,1000
+PARAMS:k9,7000,28000
+#PARAMS:k10,1000,100000000
+
+EQ:dNH3ex   = 0
+EQ:dNH4ex   = 0
+EQ:dAmtB    =  -k1*AmtB*NH4ex + k2*AmtBNH4 + k4*AmtBNH3
+EQ:dAmtBNH3 =  k3*AmtBNH4 - k4*AmtBNH3
+EQ:dAmtBNH4 =  k1*AmtB*NH4ex - k2*AmtBNH4 - k3*AmtBNH4
+EQ:dNH3in   =  k4*AmtBNH3 - k6*NH3in + k7*NH4in + k9*NH3ex
+EQ:dNH4in   =  k10*NH3in - k7*NH4in - k5*NH4in
+
+# Minimal and maximal concentrations:
+#####################################
+THRES:NH3ex:0,1e-05
+THRES:NH4ex:0,1e-05
+THRES:AmtB:0,1e-05
+THRES:AmtBNH3:0,1e-05
+THRES:AmtBNH4:0,1e-05
+THRES:NH3in:0,1e-05
+THRES:NH4in:0,1e-05
+
+# Additional thresholds for initial conditions:
+###############################################
+THRES:NH3ex:28e-09,29e-09
+THRES:NH4ex:49e-07,5e-06
+THRES:AmtB:1e-12,1e-10,99e-07,1e-06,5e-06,1e-05
+THRES:AmtBNH3:0,1e-07
+THRES:AmtBNH4:0,1e-07
+THRES:NH3in:1e-06,3e-06,8e-06,11e-07
+THRES:NH4in:2e-06,21e-07
+
+# Thresholds by refinement (it 1)
+#################################################
+#THRES:NH3ex:0,2.8e-08,2.9e-08,0.00174243,0.00195678,0.00195681,0.00195685,0.00196
+#THRES:NH4ex:0,4.9e-06,5e-06,1e-05
+#THRES:AmtB:0,1e-12,1e-10,5e-06,9.9e-06,1e-05
+#THRES:AmtBNH3:0,3.00454e-17,5.34295e-17,5.88418e-17,1e-07,2e-07,9.8e-06,9.9e-06,1e-05
+#THRES:AmtBNH4:0,1e-07,1e-05
+#THRES:NH3in:0,3.7472e-08,3.93456e-08,1e-06,1.1e-06,3e-06,8e-06,1e-05
+THRES:NH4in:0,2e-06,2.1e-06,4.58006e-06,4.58007e-06,9.91975e-06,9.91976e-06,9.91977e-06,9.92062e-06,9.92063e-06
+#,9.92064e-06,9.99822e-06,9.99823e-06,9.99824e-06,9.99825e-06,9.99826e-06,9.99909e-06,9.9991e-06,9.99911e-06,9.99912e-06,9.99913e-06,9.99914e-06,9.99997e-06,9.99998e-06,9.99999e-06,1e-05
+
+
+# Initial Conditions
+#################################################
+INIT:0,1e-05;0,1e-05;0,1e-05;0,1e-05;0,1e-05;1e-06,11e-07;2e-06,21e-07
+
+# G A (vyvraci platnost F not A)
+#A=NH3in<11e-07
+#BA:F:A,0
+
+# F not A (vyvraci platnost G A)
+#A=NH3in<11e-07
+#BA::,0;!A,1
+#BA:F:,1
+
+#A=NH4in<21e-07
+#BA:F:A,0
+
+A=NH4in<21e-07
+BA::,0;!A,1
+BA:F:,1

@@ -1,0 +1,18 @@
+VARS:X,Y,Z
+
+MACRO:kx:0.1
+MACRO:gx:0.1
+MACRO:gy:0.1
+MACRO:gz:0.1
+MACRO:ky:1
+MACRO:kz:1
+
+PARAMS:p,0.1,10
+
+dX = kx*p - gx*X
+dY = ky*rp(X,4.9,5.1) - gy*Y
+dZ = kz*rp(X,4.9,5.1)*rn(Y,4.9,5.1) - gz*Z
+
+# parameter set scan: P \in 2^{ky, kz, gy, gz}
+
+# exist paths satisfying (Z < 5.1) U [(Z >= 5.1) U (Z < 5.1)]

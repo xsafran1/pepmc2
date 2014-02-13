@@ -1,0 +1,99 @@
+VARS:pRB,pRBp,E2F1,CycDi,CycDa,AP1,pRBpp,CycEi,CycEa
+
+t1prb1=0.4
+t2prb1=0.6
+t1prbp1=4
+t2prbp1=6
+t1prb2=4
+t2prb2=6
+t1prbp2=7
+t2prbp2=9
+t1prb3=0.001
+t2prb3=0.003
+t1prbp3=1
+t2prbp3=3
+t1prb4=0.0005
+t2prb4=0.0015
+t1prbp4=5
+t2prbp4=7
+t1prb5=0.5
+t2prb5=0.7
+t1prbp5=6
+t2prbp5=8
+t1km1=0.4
+t2km1=0.6
+t1km2=3
+t2km2=4
+t1km4=0.2
+t2km4=0.4
+t1km9=0.004
+t2km9=0.006
+
+k1=1
+k2=1.6
+k3=0.05
+k16=0.4
+k34=0.04
+k43=0.01
+k61=0.3
+k67=0.7
+k76=0.1
+k23=0.3
+k25=0.9
+k28=0.06
+k89=0.07
+k98=0.01
+kp=0.05
+phprb=0.005
+phe2f1=0.1
+phcycdi=0.023
+phcycda=0.03
+phap1=0.01
+phprbp=0.06
+phprbpp=0.04
+phcycei=0.06
+phcycea=0.05
+
+#fm=0
+PARAMS:fm,0.0001,0.01
+
+EQ:dpRB = k1*rp(E2F1,t1km1,t2km1)*rn(pRB,t1prb1,t2prb1)*rn(pRBp,t1prbp1,t2prbp1) + -k16*pRB*CycDa + k61*pRBp + -phprb*pRB
+EQ:dpRBp = k16*pRB*CycDa + -k61*pRBp + -k67*pRBp*CycEa + k76*pRBpp + -phprbp*pRBp
+EQ:dE2F1 = kp + k2*rp(E2F1,t1km2,t2km2)*rn(pRB,t1prb2,t2prb2)*rn(pRBp,t1prbp2,t2prbp2) + -phe2f1*E2F1
+EQ:dCycDi = k3*AP1 + k23*E2F1*rn(pRB,t1prb3,t2prb3)*rn(pRBp,t1prbp3,t2prbp3) + k43*CycDa + -k34*CycDa*rp(CycDa,t1km4,t2km4) + -phcycdi*CycDi
+EQ:dCycDa = k34*CycDi*rp(CycDa,t1km4,t2km4) + -k43*CycDa + -phcycda*CycDa
+EQ:dAP1 = fm + k25*E2F1*rn(pRB,t1prb4,t2prb4)*rn(pRBp,t1prbp4,t2prbp4) + -phap1*AP1
+EQ:dpRBpp = k67*pRBp*CycEa + -k76*pRBpp + -phprbpp*pRBpp
+EQ:dCycEi = k28*E2F1*rn(pRB,t1prb5,t2prb5)*rn(pRBp,t1prbp5,t2prbp5) + -k89*CycEi*rp(CycEa,t1km9,t2km9) + k98*CycEa + -phcycei*CycEi
+EQ:dCycEa = k89*CycEi*rp(CycEa,t1km9,t2km9) + -k98*CycEa + -phcycea*CycEa
+
+THRES:pRB:0,10
+THRES:pRBp:0,10
+THRES:E2F1:0,10
+THRES:CycDi:0,10
+THRES:CycDa:0,1
+THRES:AP1:0,10
+THRES:pRBpp:0,10
+THRES:CycEi:0,10
+THRES:CycEa:0,0.1
+
+# [fm < 0.001] E2F1 < 0.5 => FG(E2F1 < 5)
+#a=E2F1<0.5
+#b=E2F1<5
+#BA::a,1
+#BA::,1;!b,2
+#BA:F:,1;!b,2
+
+# [fm > 0.005] FG(E2F1 > 5)
+#b=E2F1<5
+#BA::,0;b,1
+#BA:F:,0;b,1
+
+# [fm > 0.005] FG(E2F1 > 5)
+a=E2F1<0.5
+b=E2F1<5
+BA::a,1;b,3
+BA::,1;!b,2
+BA:F:!b,2;,1
+BA::,3;b,4
+BA:F:b,4;,3

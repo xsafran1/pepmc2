@@ -1,0 +1,10 @@
+VARS:X,Y0,Y1,Y2,Y3,Y4
+PARAMS:p,0.1,1.1;q,0.1,1.1
+EQ:X = p*SP[100](u,k,n) + (-0.1)*X
+EQ:dY0 = SM(u,k,n) + (-0.1)*Y0
+THRES:X:0,10
+THRES:Y0:0,10
+INIT:0:10,0:10
+BA::X<4.9,1
+BA::,1;!Y0<4.9,2
+BA:F:,1;!Y0<4.9,2
