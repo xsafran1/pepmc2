@@ -11,6 +11,23 @@ T cas(T & destination, T new_value, T old_value)
 	return (T)InterlockedCompareExchangePointer((void **)&destination, (void *)new_value, (void *)old_value);
 }
 
+template <typename T>
+T load_acquire(T const & v)
+{
+
+	T res = v;
+
+	return res;
+}
+
+template <typename T>
+void store_release(T & t, T v)
+{
+
+	t = v;
+
+}
+
 #else
 
 template <typename T>
@@ -39,22 +56,5 @@ void store_release(T & t, T v)
 }
 
 #endif
-
-template <typename T>
-T load_acquire(T const & v)
-{
-	
-	T res = v;
-	
-	return res;
-}
-
-template <typename T>
-void store_release(T & t, T v)
-{
-	
-	t = v;
-	
-}
 
 #endif
