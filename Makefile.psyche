@@ -1,0 +1,7 @@
+all:
+	g++ -o pmc *.cpp -g -L/nix/store/1mv7j05djp90vbwmv92h54zjq00jlyz6-boost-1.51.0/lib/ -I/nix/store/1mv7j05djp90vbwmv92h54zjq00jlyz6-boost-1.51.0/include/ -lboost_thread -lpthread -std=c++0x
+
+nohoard:
+	g++ -o pmc-nohoard *.cpp -O3 -lboost_thread -lpthread -g -std=c++0x
+release:
+	g++ -o pmc -L. -lhoard *.cpp -O3 -lboost_thread -lpthread -g -std=c++0x
