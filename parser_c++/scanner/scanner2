@@ -27,7 +27,7 @@ NAZOV       [a-zA-Z]+[_0-9a-zA-Z-]*
 					return Parser::RAMP;
 				}
 
-[Ss][pm](inv)*(\[({CISLO}|{NAZOV})\])*"("{NAZOV}\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\)	{
+[Ss][pm](inv)*(\[(([0-9]+)|{NAZOV})\])*"("{NAZOV}\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\)	{
                     column_num += length();
 					return Parser::SIGM;
 				}

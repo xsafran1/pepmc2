@@ -2,63 +2,25 @@
 #include <iostream>
 #include <fstream>
 #include "parser/Parser.h"
+#include "./data_model/Normalizer.h"
+#include "./data_model/Normalizer.cpp"
+#include "./data_model/Model.h"
+#include "./data_model/Model.cpp"
 
 using namespace std;
 
 int main (int argc, char **argv)
 {
-    if(argc == 2) {
-        std::ifstream fin(argv[1]);
-        Parser parser(fin);
-        parser.parse();
-        Skusobna &storage = parser.returnStorage();
+    Parser parser(cin);
+    parser.parse();
+    Model &model = parser.returnStorage();
 
-        cout << "VARs: \n";
-        for(string v : storage.var) {
-            cout << "\t" << v << endl;
-        }
-        cout << "CONSTs: \n";
-        for(double v : storage.constant) {
-            cout << "\t" << v << endl;
-        }
-        cout << "RAMPs: \n";
-        for(string v : storage.ramp) {
-            cout << "\t" << v << endl;
-        }
-        cout << "SIGMs: \n";
-        for(string v : storage.sigm) {
-            cout << "\t" << v << endl;
-        }
-        cout << "STEPs: \n";
-        for(string v : storage.step) {
-            cout << "\t" << v << endl;
-        }
-    } else {
-        Parser parser(std::cin);
-        parser.parse();
-        Skusobna &storage = parser.returnStorage();
-
-        cout << "VARs: \n";
-        for(string v : storage.var) {
-            cout << "\t" << v << endl;
-        }
-        cout << "CONSTs: \n";
-        for(double v : storage.constant) {
-            cout << "\t" << v << endl;
-        }
-        cout << "RAMPs: \n";
-        for(string v : storage.ramp) {
-            cout << "\t" << v << endl;
-        }
-        cout << "SIGMs: \n";
-        for(string v : storage.sigm) {
-            cout << "\t" << v << endl;
-        }
-        cout << "STEPs: \n";
-        for(string v : storage.step) {
-            cout << "\t" << v << endl;
-        }
+    Normalizer normalizer;
+/*
+    cout << "VARS: \n";
+    for(int i = 0; i < model.getVariables().size(); i++) {
+        cout << "\t" << model.getVariable(i) << endl;
     }
-
+*/
 	return 0;
 }
