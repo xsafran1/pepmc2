@@ -1,0 +1,173 @@
+%scanner		../scanner/Scanner.h
+%scanner-token-function d_scanner.lex()
+
+
+%union {
+	double	dvalue;
+	char*	svalue;
+}
+
+%token <svalue> VAR_LINE
+%token <svalue> PARAM_LINE
+%token <svalue> EQ_LINE
+%token <svalue> THRES_LINE
+%token <svalue> CONST_LINE
+%token <svalue> INIT_LINE
+%token <svalue> BA_LINE
+
+%token <svalue> NAME
+
+%token <dvalue> NUMBER
+
+%token <svalue> RAMP
+
+%token <svalue> SIGM
+
+%token <svalue> STEP
+
+%left '+' '-'
+%left '*'
+%nonassoc '='
+//',' ';' ':'
+
+%start start
+
+
+%%
+
+
+start:	line '\n'               {
+                                    line_num++;
+                                    d_scanner.column_num = 1;
+                                }
+	|	start line '\n'         {
+                                    line_num++;
+                                    d_scanner.column_num = 1;
+                                }
+;
+
+line:       /* empty line */
+    |   EQ_LINE 	eq_defs
+	|	PARAM_LINE 	param_defs
+	|	VAR_LINE 	var_defs
+	|	THRES_LINE 	thres_defs
+	|   CONST_LINE  const_defs
+	|   INIT_LINE   init_defs
+	|   BA_LINE                     {
+                                        std::string ba = d_scanner.matched().substr(d_scanner.matched().find_first_not_of(" \t",3));
+                                        std::cout << ba << std::endl;
+                                    }
+;
+
+
+init_defs:      init_def
+    |           init_defs ';' init_def
+;
+
+init_def:       init_name ',' init_interval     { std::cout << '\n'; }
+;
+
+init_name:      NAME                { std::cout << "Init:" << d_scanner.matched() << ":";}
+;
+
+init_interval:      init_value ',' NUMBER       { std::cout << '-' << d_scanner.matched();}
+;
+
+init_value:     NUMBER              { std::cout << d_scanner.matched();}
+;
+
+const_defs:     const_def
+    |           const_defs ';' const_def
+;
+
+const_def:      const_name ',' const_value
+;
+
+const_name:         NAME            { std::cout << d_scanner.matched() << ":";}
+;
+
+const_value:        NUMBER          { std::cout << d_scanner.matched() << std::endl;}
+;
+
+thres_defs:     thres_name ':' thres_values     {std::cout << "\n";}
+;
+
+thres_name:         NAME            { std::cout << d_scanner.matched() << ":";}
+;
+
+thres_values:		NUMBER					{ std::cout << d_scanner.matched();}
+	|			thres_values ',' NUMBER		{ std::cout << "," << d_scanner.matched();}
+;
+
+var_defs:		NAME				{ std::cout << d_scanner.matched() << ',';}
+	|		var_defs ',' NAME		{ std::cout << d_scanner.matched() << std::endl;}
+;
+
+param_defs:	param_def
+	|		param_defs ';' param_def
+;
+
+param_def:	param_name ',' param_interval       {std::cout << "\n";}
+;
+
+param_interval:     param_value ',' NUMBER      { std::cout << ',' << d_scanner.matched();}
+;
+
+param_name:		NAME		{ std::cout << d_scanner.matched() << ":";}
+;
+
+param_value:	NUMBER		{ std::cout << d_scanner.matched();}
+;
+
+eq_defs:		eq_var '=' expr	    { std::cout << "-------END-EQ-------\n"; }
+;
+
+eq_var:     NAME            { std::cout << "v_eq\t" << d_scanner.matched() << std::endl;}
+;
+/*
+expr:		ap
+	|	expr '+' expr
+	|	expr '-' expr
+	|	expr '*' expr
+	|	'(' '-' ap ')'
+	|	'(' expr ')'
+	|	'[' expr ']'
+;
+*/
+ap:		NUMBER		{ 	std::cout << "c\t" << d_scanner.matched() << std::endl;
+						storage.constant.push_back(stod(d_scanner.matched())); }
+	|	NAME		{ 	std::cout << "v\t" << d_scanner.matched() << std::endl;
+						storage.var.push_back(d_scanner.matched()); }
+	|	RAMP		{ 	std::cout << "r\t" << d_scanner.matched() << std::endl;
+						storage.ramp.push_back(d_scanner.matched()); }
+	|	SIGM		{ 	std::cout << "s\t" << d_scanner.matched() << std::endl;
+						storage.sigm.push_back(d_scanner.matched()); }
+	|	STEP		{ 	std::cout << "h\t" << d_scanner.matched() << std::endl;
+						storage.step.push_back(d_scanner.matched()); }
+;
+
+expr:       summation       { std::cout << "expr -> summation\n";}
+    |       ap              { std::cout << "expr -> ap\n";}
+;
+
+summation:      summant                     { std::cout << "summation -> summant\n";}
+    |           summation '+' summant       { std::cout << "summation -> summation + summant\n";}
+    |           summation '-' summant       { std::cout << "summation -> summation - summant\n";}
+;
+
+summant:        multiplication          { std::cout << "summant -> multiplication\n";}
+    |           parenthesis             { std::cout << "summant -> parenthesis\n";}
+;
+
+multiplication:     multiple                        { std::cout << "multiplication -> multiple\n";}
+    |               multiplication '*' multiple     { std::cout << "multiplication -> multiplication * multiple\n";}
+;
+
+multiple:       ap                  { std::cout << "multiple -> ap\n";}
+    |           parenthesis         { std::cout << "multiple -> parenthesis\n";}
+;
+
+parenthesis:        '(' expr ')'        { std::cout << "parenthesis -> ( expr )\n";}
+    |               '[' expr ']'        { std::cout << "parenthesis -> [ expr ]\n";}
+    |               '(' '-' expr ')'    { std::cout << "parenthesis -> ( -expr )\n";}
+;

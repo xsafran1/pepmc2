@@ -1,0 +1,95 @@
+NAME:   [a-zA-Z][_0-9a-zA-Z-]* ( Nazov zacinajuci velkym alebo malym pismenom nasledovanym akoukolvek kombinaciou pismen, cisel a znakov -_ )
+
+NUMBER: akekolvek cele, alebo desatinne cislo
+
+RAMP:	rp(*) | rm(*) | rpcoor(~) | rmcoor(~) |
+        Rp(*) | Rm(*) | Rpcoor(~) | Rmcoor(~)
+	* = var, theta1, theta2, a, b
+	~ = var, theta1, theta2, y1, y2
+
+SIGM:	Sp(*) | Sm(*) | Spinv(*) | Sminv(*) | Sp[~](*) | Sm[~](*) | Spinv[~](*) | Sminv[~](*) |
+        sp(*) | sm(*) | spinv(*) | sminv(*) | sp[~](*) | sm[~](*) | spinv[~](*) | sminv[~](*)
+	* = var, k, theta1, a, b
+	~ = n
+
+STEP:	Hp(*) | Hm(*) |
+        hp(*) | hm(*)
+	* = var, theta1, m
+
+NAME - sem patria vsetky pomenovane premenne, parametre a konstanty
+NUMBER - nepomenovane konstanty (resp. cisla)
+
+var = variable (premenna / dimenzia)
+thetaX = threshold (priamo zadane cislo)
+
+VSETKY NASLEDUJUCE PARAMETRE MOZU BYT ZADANE POMOCOU NAME ALEBO NUMBER:
+    a,b = parametre spresnujuce polohu krivky (resp. priamky) v priestore
+    y1,y2 = parametre priamo urcujuce y-ovu polohu koncoveho bodu priamky
+    k = parameter, ktory neviem co znamena ale je vo vzorci pre vypocet sigmoidy :)
+    n = parameter urcujuci jemnost (resp. presnost) prevodu krivky do ramp funkcii      !!!ZISTIT CI MOZE BYT AJ DESATINNE CISLO!!!
+    m = parameter urcujuci jemnost (resp. presnost) sklonu step funkcie
+
+=======================================================
+
+
+start:	            line \n | start line \n
+
+line:               /* empty line */
+                |   EQ: 	    eq_defs
+                |	PARAMS: 	param_defs
+                |	VARS: 	    var_defs
+                |	THRES: 	    thres_defs
+                |   CONSTS:     const_defs
+                |   INIT:       init_defs
+                |   BA:         .*          (lubovolny obsah riadku az po znak \n)
+
+init_defs:          init_def | init_defs ; init_def
+
+init_def:           NAME , NUMBER , NUMBER
+
+const_defs:         const_def | const_defs ; const_def
+
+const_def:          NAME , NUMBER
+
+thres_defs:         NAME : thres_values
+
+thres_values:		NUMBER | thres_values , NUMBER
+
+var_defs:		    NAME | var_defs , NAME
+
+param_defs:	        param_def | param_defs ; param_def
+
+param_def:	        NAME , NUMBER , NUMBER
+
+eq_defs:		    NAME = expr
+
+ap:		            NUMBER | NAME | RAMP | SIGM | STEP
+
+expr:               summation | ap
+
+summation:          summant | summation + summant | summation - summant
+
+summant:            multiplication | parenthesis
+
+multiplication:     multiple | multiplication * multiple
+
+multiple:           ap | parenthesis
+
+parenthesis:        ( expr ) | [ expr ] | ( - expr )
+
+=================================================
+
+
+----KASLAT NA UVODNE d v rovniciach
+
+Pobrat obe varianty ramp: pre x1, x2, y1, y2	|	pre x1, x2, a, b
+default y1=0,y2=1 (pokud neuvedeno) a mozno aj a, b (treba overit)
+	[Rr][mp](coor)?"("...")"
+
+zaporna hodnota ve formatu (-expr), povinna zavorka
+
+omezeni: var*var only for different vars - OVEROVAT NA UROVNI SUMANTOV
+
+omezeni: v nejvyssim expr max. jeden vyskyt parametru z mnoziny neznamych
+
+ignoruje komentare typov #,//,/* */
