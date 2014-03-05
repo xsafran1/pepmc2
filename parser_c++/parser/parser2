@@ -14,6 +14,7 @@
 %token <svalue> CONST_LINE
 %token <svalue> INIT_LINE
 %token <svalue> BA_LINE
+%token <svalue> VAR_POINTS_LINE
 
 %token <svalue> NAME
 
@@ -58,8 +59,24 @@ line:       /* empty line */
                                         // V ba JE CELY RIADOK BEZ UVODNEHO 'BA:' A PRIPADNYCH BIELICH ZNAKOV AZ PO SKUTOCNY ZACIATOK
                                         //std::cout << ba << std::endl;
                                     }
+    |   VAR_POINTS_LINE     var_points_defs
 ;
 
+var_points_defs:    var_points_def
+    |               var_points_defs ';' var_points_def
+;
+
+var_points_def:     var_points_name ':' var_points_values
+;
+
+var_points_name:        NAME
+;
+
+var_points_values:      var_points_value ',' NUMBER
+;
+
+var_points_value:       NUMBER
+;
 
 init_defs:      init_def
     |           init_defs ';' init_def

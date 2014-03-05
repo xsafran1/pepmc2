@@ -1,7 +1,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <math.h>
+#include <cmath>
 #include <time.h>
 
 using namespace std;
@@ -436,7 +436,52 @@ public:
 // NAJDE NAJKRAJNEJSIE THRESHOLDY A POMOCOU FUNKCIE generateXPoints() VYGENERUJE X-OVE SURADNICE A POMOCOU NICH
 // VYPOCITA A ULOZI VSETKY Y-OVE HODNOTY DO vector<vector<double> > KTORY NAKONEC AJ ODOVZDA CEZ RETURN
 // TREBA MYSLET AJ NA TO ZE vector<double> x BUDE TREBA TIEZ NEJAKO ODOVZDAT VON !!!
-//generateSpace()
+vector<vector<double> > generateSpace(vector<Sigmoid> s, vector<double> &x, int numOfX) {
+
+    vector<vector<double> > y;
+
+    if(s.size() > 0) {
+
+        double min = s.at(0).theta;       //TODO: bude treba .theta nahradit spravnou funkciou
+        int minIndex = 0;
+        double max = s.at(0).theta;       //TODO: bude treba .theta nahradit spravnou funkciou
+        int maxIndex = 0;
+
+        if(s.size() > 1) {
+
+            for(int i = 1; i < s.size(); i++) {
+
+                double theta = s.at(i).theta;       //TODO: bude treba .theta nahradit spravnou funkciou
+
+                if(theta < min) {
+                    min = theta;
+                    minIndex = i;
+                }
+                if(theta > max) {
+                    max = theta;
+                    maxIndex = i;
+                }
+            }
+        }
+        double steepnessParam = 1.5;
+
+        min = min - (2.0 / s.at(minIndex).k) * steepnessParam;       //TODO: bude treba .k nahradit spravnou funkciou
+        max = max + (2.0 / s.at(maxIndex).k) * steepnessParam;       //TODO: bude treba .k nahradit spravnou funkciou
+
+        if(numOfX != 0) {
+            x = generateXPoints(min, max, numOfX);
+        } else {
+            x = generateXPoints(min, max, (max - min)*200);
+        }
+
+        for(int i = 0; i < s.size(); i++) {
+            y.push_back(s.at(i).enumerateYPoints(x));
+        }
+    }
+
+    return y;
+}
+
 
 
 

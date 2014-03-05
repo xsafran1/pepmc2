@@ -1,38 +1,38 @@
 %class-name Scanner
 
 
-DIGIT		[0-9]
-DIGIT1		[1-9]
-CHAR		[a-zA-Z]
-ALNUM		[_0-9a-zA-Z-]
-CISLO       [0-9]+([\.][0-9]+)?
-NAZOV       [a-zA-Z]+[_0-9a-zA-Z-]*
+DIGIT		    [0-9]
+DIGIT1		    [1-9]
+CHAR		    [a-zA-Z]
+ALNUM		    [_0-9a-zA-Z-]
+REAL_NUMBER     [0-9]+([\.][0-9]+)?
+CHAR_STRING     [a-zA-Z]+[_0-9a-zA-Z-]*
 
 
 %%
 
 
-{CISLO}			{
+{REAL_NUMBER}		{
                         column_num += length();
 						return Parser::NUMBER;
 					}
 
-{NAZOV}		{
+{CHAR_STRING}		{
                         column_num += length();
 						return Parser::NAME;
 					}
 
-[Rr][mp](coor)?"("{NAZOV}\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})")"		{
+[Rr][mp](coor)?"("{CHAR_STRING}\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})")"		{
                     column_num += length();
 					return Parser::RAMP;
 				}
 
-[Ss][pm](inv)*(\[(([0-9]+)|{NAZOV})\])*"("{NAZOV}\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\)	{
+[Ss][pm](inv)*(\[(([0-9]+)|{CHAR_STRING})\])*"("{CHAR_STRING}\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})(\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING}))?\)	{
                     column_num += length();
 					return Parser::SIGM;
 				}
 
-[Hh][mp]"("{NAZOV}\,({CISLO}|{NAZOV})\,({CISLO}|{NAZOV})\)	{
+[Hh][mp]"("{CHAR_STRING}\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})\)	{
                     column_num += length();
 					return Parser::STEP;
 				}
@@ -64,6 +64,10 @@ NAZOV       [a-zA-Z]+[_0-9a-zA-Z-]*
 ^(BA:).+        {
                     column_num += length();
                     return Parser::BA_LINE;
+                }
+^(VAR_POINTS:)  {
+                    column_num += length();
+                    return Parser::VAR_POINTS_LINE;
                 }
 
 ^#.*                  /* ignored */

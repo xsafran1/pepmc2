@@ -1,6 +1,6 @@
-NAME:   [a-zA-Z][_0-9a-zA-Z-]* ( Nazov zacinajuci velkym alebo malym pismenom nasledovanym akoukolvek kombinaciou pismen, cisel a znakov -_ )
+NAME:   [a-zA-Z][_0-9a-zA-Z-]* ( Some name starting with upper case or lower case letter following whichever combination of letters, digits and '-' '_' characters )
 
-NUMBER: akekolvek cele, alebo desatinne cislo
+NUMBER: whichever integer or real number
 
 RAMP:	rp(*) | rm(*) | rpcoor(~) | rmcoor(~) |
         Rp(*) | Rm(*) | Rpcoor(~) | Rmcoor(~)
@@ -16,18 +16,18 @@ STEP:	Hp(*) | Hm(*) |
         hp(*) | hm(*)
 	* = var, theta1, m
 
-NAME - sem patria vsetky pomenovane premenne, parametre a konstanty
-NUMBER - nepomenovane konstanty (resp. cisla)
+NAME - matching whichever named variable, parameter or constant
+NUMBER - matching nameless constants (simply numbers)
 
-var = variable (premenna / dimenzia)
-thetaX = threshold (priamo zadane cislo)
+var = variable (dimension)
+thetaX = threshold
 
-VSETKY NASLEDUJUCE PARAMETRE MOZU BYT ZADANE POMOCOU NAME ALEBO NUMBER:
-    a,b = parametre spresnujuce polohu krivky (resp. priamky) v priestore
-    y1,y2 = parametre priamo urcujuce y-ovu polohu koncoveho bodu priamky
-    k = parameter, ktory neviem co znamena ale je vo vzorci pre vypocet sigmoidy :)
-    n = parameter urcujuci jemnost (resp. presnost) prevodu krivky do ramp funkcii      !!!ZISTIT CI MOZE BYT AJ DESATINNE CISLO!!!
-    m = parameter urcujuci jemnost (resp. presnost) sklonu step funkcie
+All following parameters may be represented by NAME or NUMBER:
+    a,b = parameters concretizing location of ramp in space according to (y = a*x + b)
+    y1,y2 = parameters exactly determining y values of end-points of ramp
+    k = parameter determining steepness of sigmoid function
+    n = parameter determining accuracy or gentleness of change from curve to ramps
+    m = parameter determining accuracy or gentleness of steepness of step function
 
 =======================================================
 
@@ -41,7 +41,12 @@ line:               /* empty line */
                 |	THRES: 	    thres_defs
                 |   CONSTS:     const_defs
                 |   INIT:       init_defs
-                |   BA:         .*          (lubovolny obsah riadku az po znak \n)
+                |   VAR_POINTS: var_points_defs     (OPTIONAL: determines number of x points and number of segments per variable)
+                |   BA:         .*                  (random string before '\n' character according to Buchi automaton definition)
+
+var_points_defs:    var_points_def | var_points_defs ; var_points_def
+
+var_points_def:     NAME : NUMBER , NUMBER
 
 init_defs:          init_def | init_defs ; init_def
 
@@ -80,16 +85,15 @@ parenthesis:        ( expr ) | [ expr ] | ( - expr )
 =================================================
 
 
-----KASLAT NA UVODNE d v rovniciach
+In equation for some variable, this variable must be written without starting 'd' symbol
 
-Pobrat obe varianty ramp: pre x1, x2, y1, y2	|	pre x1, x2, a, b
-default y1=0,y2=1 (pokud neuvedeno) a mozno aj a, b (treba overit)
-	[Rr][mp](coor)?"("...")"
+default values for ramp definition: y1 = 0, y2 = 1 or a = 1, b = 0
 
-zaporna hodnota ve formatu (-expr), povinna zavorka
+limitation: negative value must be in format '(' '-' value ')'
+            parentheses are necessary in this case
 
-omezeni: var*var only for different vars - OVEROVAT NA UROVNI SUMANTOV
+limitation: var*var only for different vars
 
-omezeni: v nejvyssim expr max. jeden vyskyt parametru z mnoziny neznamych
+limitation: in the highest level of expr only one parameter can be unknown
 
-ignoruje komentare typov #,//,/* */
+parser ignores commentary of types #, //, /* */
