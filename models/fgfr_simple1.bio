@@ -1,0 +1,57 @@
+VARS:FGF,FGFRact,FRS2act,RafP,RasP,ERKpp
+THRES:FGF:0,1
+THRES:FGFRact:0,100
+THRES:FRS2act:0,100
+THRES:RafP:0,100
+THRES:RasP:0,100
+THRES:ERKpp:0,100
+
+# FGF
+t_FGF_FGFRact_0=0.49
+t_FGF_FGFRact_1=0.51
+
+# FGFRact
+t_FGFRact_FRS2act_0=49
+t_FGFRact_FRS2act_1=51
+
+k_FGFRact=0.5
+g_FGFRact=0.1
+
+# FRS2act
+t_FRS2act_RasP_0=49
+t_FRS2act_RasP_1=51
+
+k_FRS2act=0.5
+g_FRS2act=0.1
+
+# RafP
+t_RafP_ERKpp_0=49
+t_RafP_ERKpp_1=51
+
+k_FRS2act=0.5
+g_FRS2act=0.1
+
+# RasP
+t_RasP_RafP_0=49
+t_RasP_RafP_1=51
+
+k_RasP=0.5
+g_RasP=0.1
+
+# ERKpp
+k_ERKpp=0.5
+g_ERKpp=0.1
+
+# dynamics
+dFGF = 0
+dERKpp = k_ERKpp*rp(RafP,t_RafP_ERKpp_0,t_RafP_ERKpp_1) - g_ERKpp*ERKpp
+dFGFRact = k_FGFRact*rp(FGF,t_FGF_FGFRact_0,t_FGF_FGFRact_1) - g_FGFRact*FGFRact
+dFRS2act = k_FRS2act*rp(FGFRact,t_FGFRact_FRS2act_0,t_FGFRact_FRS2act_1) - g_FRS2act*FRS2act
+dRafP = k_RafP*rp(RasP,t_RasP_RafP_0,t_RasP_RafP_1) - g_RafP*RafP
+dRasP = k_RasP*rp(FRS2act,t_FRS2act_RasP_0,t_FRS2act_RasP_1) - g_RasP*RasP
+
+# initial conditions
+# all
+
+# property
+
