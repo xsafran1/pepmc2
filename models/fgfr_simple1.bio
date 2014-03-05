@@ -56,5 +56,6 @@ dRasP = k_RasP*rp(FRS2act,t_FRS2act_RasP_0,t_FRS2act_RasP_1) + (-g_RasP)*RasP
 # all
 
 # property
-BA::,0;ERKpp>50,1
-BA:F:ERKpp>50,1
+A=!ERKpp<50
+BA::,0;A,1
+BA:F:A,1
