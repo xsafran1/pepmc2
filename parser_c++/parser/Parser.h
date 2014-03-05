@@ -9,22 +9,24 @@
 #include "../scanner/Scanner.h"
 
 #include "../skusobna_trieda.h"
+#include "../data_model/Model.h"
+#include "../data_model/Normalizer.h"
 
 #undef Parser
 class Parser: public ParserBase
 {
     // $insert scannerobject
-    Scanner d_scanner;
-	int line_num = 1;
-	Skusobna storage;
+        Scanner d_scanner;
+        int line_num = 1;
+        Model storage;
 
     public:
         int parse();
-	Parser() {}
-	Parser(std::istream &in = std::cin, std::ostream &out = std::cout);
 
-	void initializeStorage(Skusobna &st);
-	Skusobna& returnStorage();
+        Parser() {}
+        Parser(std::istream &in = std::cin, std::ostream &out = std::cout);
+
+        Model& returnStorage();
 
     private:
         void error(char const *msg);    // called on (syntax) errors

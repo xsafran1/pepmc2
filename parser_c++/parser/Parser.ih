@@ -9,12 +9,12 @@
 Parser::Parser(std::istream &in, std::ostream &out) : ParserBase(), d_scanner(in,out) {
 }
 
-Skusobna& Parser::returnStorage() {
+Model& Parser::returnStorage() {
 	return storage;
 }
 
 
-    // Add below here any includes etc. that are only 
+    // Add below here any includes etc. that are only
     // required for the compilation of Parser's sources.
 
 
