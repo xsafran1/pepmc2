@@ -1,5 +1,7 @@
 #include <string>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <cmath>
 #include <time.h>
@@ -139,12 +141,12 @@ vector <double> optimalGlobalLinearApproximation (vector <double> x, vector < ve
 
     ib[n_segments] = n_points-1;
     xb[n_segments] = x[ib[n_segments]];
-    cout << "x[ib[n_segments]]=" << x[ib[n_segments]] << "\n";
+    //cout << "x[ib[n_segments]]=" << x[ib[n_segments]] << "\n";
     for (int i=n_segments-1; i >= 0; i--)
     {
          ib[i] = father[ib[i+1]][i];
          xb[i] = x[ib[i]];
-         // cout << "x" << n_points - i << "=" << xb[i] << "\n";
+         //cout << "x" << n_points - i << "=" << xb[i] << "\n";
     }
 
 
@@ -432,6 +434,7 @@ public:
     }
 };
 
+
 // TAKZE FUNKCIA KTORA BUDE NEJAKYM SPOSOBOM BRAT SIGMOIDY (BUD VSETKY A Z NICH SI VYBERE ALEBO UZ DOSTANE TI SPRAVNE)
 // NAJDE NAJKRAJNEJSIE THRESHOLDY A POMOCOU FUNKCIE generateXPoints() VYGENERUJE X-OVE SURADNICE A POMOCOU NICH
 // VYPOCITA A ULOZI VSETKY Y-OVE HODNOTY DO vector<vector<double> > KTORY NAKONEC AJ ODOVZDA CEZ RETURN
@@ -442,36 +445,31 @@ vector<vector<double> > generateSpace(vector<Sigmoid> s, vector<double> &x, int 
 
     if(s.size() > 0) {
 
-        double min = s.at(0).theta;       //TODO: bude treba .theta nahradit spravnou funkciou
-        int minIndex = 0;
-        double max = s.at(0).theta;       //TODO: bude treba .theta nahradit spravnou funkciou
-        int maxIndex = 0;
+        double intervalDeviationParam = 1.5;
+
+        double min = s.at(0).theta - (2.0 / s.at(0).k) * intervalDeviationParam;       //TODO: bude treba .theta a .k nahradit spravnou funkciou
+        double max = s.at(0).theta + (2.0 / s.at(0).k) * intervalDeviationParam;       //TODO: bude treba .theta a .k nahradit spravnou funkciou
 
         if(s.size() > 1) {
 
             for(int i = 1; i < s.size(); i++) {
 
-                double theta = s.at(i).theta;       //TODO: bude treba .theta nahradit spravnou funkciou
+                double tempMin = s.at(i).theta - (2.0 / s.at(i).k) * intervalDeviationParam;       //TODO: bude treba .theta a .k nahradit spravnou funkciou
+                double tempMax = s.at(i).theta + (2.0 / s.at(i).k) * intervalDeviationParam;       //TODO: bude treba .theta a .k nahradit spravnou funkciou
 
-                if(theta < min) {
-                    min = theta;
-                    minIndex = i;
+                if(tempMin < min) {
+                    min = tempMin;
                 }
-                if(theta > max) {
-                    max = theta;
-                    maxIndex = i;
+                if(tempMax > max) {
+                    max = tempMax;
                 }
             }
         }
-        double steepnessParam = 1.5;
-
-        min = min - (2.0 / s.at(minIndex).k) * steepnessParam;       //TODO: bude treba .k nahradit spravnou funkciou
-        max = max + (2.0 / s.at(maxIndex).k) * steepnessParam;       //TODO: bude treba .k nahradit spravnou funkciou
 
         if(numOfX != 0) {
             x = generateXPoints(min, max, numOfX);
         } else {
-            x = generateXPoints(min, max, (max - min)*200);
+            x = generateXPoints(min, max, (max - min)*100);
         }
 
         for(int i = 0; i < s.size(); i++) {
@@ -484,11 +482,92 @@ vector<vector<double> > generateSpace(vector<Sigmoid> s, vector<double> &x, int 
 
 
 
+vector<double> computeRampFunctions(vector<Sigmoid> s, int numOfSegments, int numOfX = 0) {
+
+    int defaultNumOfSegments = 1;
+
+    if(numOfSegments > defaultNumOfSegments)
+        defaultNumOfSegments = numOfSegments;
+
+    cout << "NUMBER OF SEGMENTS = " << defaultNumOfSegments << endl;
+
+    //TODO: treba sa dohodnut ohladom obsahu hranatych zatvoriek u jednotlivych sigmoidov
+
+
+    vector<double> xPoints;
+    vector<vector<double> > curves = generateSpace(s,xPoints,numOfX);
+    vector<double> segmentsPoints;
+
+    clock_t start, finish;          //TODO: neskor zmazat
+    double durationInSec;           //TODO: neskor zmazat
+/*
+    start = clock();                //TODO: neskor zmazat
+    segmentsPoints = optimalFastGlobalLinearApproximation2 (xPoints, curves, defaultNumOfSegments);
+
+    finish = clock();               //TODO: neskor zmazat
+    durationInSec = (double)(finish - start) / CLOCKS_PER_SEC;          //TODO: neskor zmazat
+    cout << "duration = " << durationInSec << " sec. Found = ";          //TODO: neskor zmazat
+    for(int i = 0; i < segmentsPoints.size(); i++)
+        cout << segmentsPoints.at(i) << ",";
+    cout << endl;
+*/
+
+    start = clock();                //TODO: neskor zmazat
+    segmentsPoints = optimalGlobalLinearApproximation (xPoints, curves, defaultNumOfSegments);
+
+    finish = clock();               //TODO: neskor zmazat
+    durationInSec = (double)(finish - start) / CLOCKS_PER_SEC;      //TODO: neskor zmazat
+    cout << "duration = " << durationInSec << " sec. Found = ";     //TODO: neskor zmazat
+    for(int i = 0; i < segmentsPoints.size(); i++)                  //TODO: neskor zmazat
+        cout << segmentsPoints.at(i) << ",";                        //TODO: neskor zmazat
+    cout << endl;                                                   //TODO: neskor zmazat
+
+    return segmentsPoints;
+}
+
+
+
+vector<Sigmoid> generateTestingCurves(int whichCase) {
+    vector<Sigmoid> curves;
+    switch(whichCase) {
+        case 0:
+            curves.push_back(Sigmoid(true,"x",2.0,0.0,0.0,1.0));
+            break;
+        case 1:
+            curves.push_back(Sigmoid(true,"x",2.0,0.0,0.0,1.0));
+            curves.push_back(Sigmoid(true,"x",2.0,0.0,0.0,5.0));
+            curves.push_back(Sigmoid(true,"x",1.5,0.0,0.0,1.0));
+            curves.push_back(Sigmoid(true,"x",2.5,1.0,2.0,4.0));
+            break;
+    }
+    return curves;
+}
+
+
 
 int main() {
 
-    //vector <vector <double> > curves;
+    int testingCase = 1;
+    vector<double> segmentsPoints;
+    vector<Sigmoid> curves = generateTestingCurves(testingCase);
 
+    segmentsPoints = computeRampFunctions(curves,1,0);
+    segmentsPoints = computeRampFunctions(curves,10,0);
+
+    for(int j = 0; j < curves.size(); j++) {
+        stringstream ss;
+        ss << j;
+        string fileName = "test_curve" + ss.str() + ".dat";
+        ofstream out(fileName,ofstream::out | ofstream::trunc);
+        if(out.is_open()) {
+            for(int i = 0; i < segmentsPoints.size(); i++) {
+                out << segmentsPoints.at(i) << "\t" << curves.at(j).enumerateYPoints(segmentsPoints).at(i) << "\n";
+            }
+            out.close();
+        }
+    }
+
+/*
     vector <vector <double > >::iterator i_curve;
     vector <double>::iterator i_point;
 
@@ -552,9 +631,6 @@ int main() {
 
 
     cout << "duration= " << durationInSec << " sec. \n";
-
-
-
-
+*/
 }
 
