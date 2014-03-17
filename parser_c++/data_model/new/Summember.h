@@ -8,6 +8,9 @@ public:
 	typedef T value_type;
 
 private:
+	value_type constant;
+	std::size_t param;
+	std::vector<std::size_t> vars;
 
 	struct ramp
 	{
@@ -59,8 +62,7 @@ private:
 					y.push_back((1 / tempA) + ((1 / tempB) - (1 / tempA))*((1 + tanh(k*(x.at(i) - (theta + log(tempB / tempA) / (2 * k)))))*0.5));
 				}
 
-			}
-			else {
+			} else {
 				if (!positive) {
 					tempA = b;
 					tempB = a;
@@ -79,6 +81,7 @@ private:
 
 
 public:
+
 	Summember()
 		: constant(1), param(0)
 	{}
@@ -177,20 +180,17 @@ public:
 
 	const Summember<T>  operator*(/*const*/ Summember<T> &);
 
-private:
-	value_type constant;
-	std::size_t param;
-	std::vector<std::size_t> vars;
-
 };
 
 template <typename T>
 const Summember<T> Summember<T>::operator*(/*const*/ Summember<T> & s2)
 {
+
+	typedef T value_type;
+
 	Summember<T> & s1 = *this;
 	Summember<T>  s_final;
 
-	typedef T value_type;
 
 	value_type c1 = s1.GetConstant();
 	value_type c2 = s2.GetConstant();
@@ -209,12 +209,12 @@ const Summember<T> Summember<T>::operator*(/*const*/ Summember<T> & s2)
 
 
 	std::vector<std::size_t> vars1 = s1.GetVars();
-	for (typename std::vector<size_t>::iterator it = vars1.begin(); it != vars1.end(); it++) {
+	for (std::vector<size_t>::iterator it = vars1.begin(); it != vars1.end(); it++) {
 		s_final.AddVar(*it);
 	}
 
 	std::vector<std::size_t> vars2 = s2.GetVars();
-	for (typename std::vector<size_t>::iterator it = vars2.begin(); it != vars2.end(); it++) {
+	for (std::vector<size_t>::iterator it = vars2.begin(); it != vars2.end(); it++) {
 		s_final.AddVar(*it);
 	}
 

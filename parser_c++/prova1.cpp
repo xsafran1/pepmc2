@@ -535,8 +535,14 @@ vector<Sigmoid> generateTestingCurves(int whichCase) {
             break;
         case 1:
             curves.push_back(Sigmoid(true,"x",2.0,0.0,0.0,1.0));
-            curves.push_back(Sigmoid(true,"x",2.0,0.0,0.0,5.0));
+            curves.push_back(Sigmoid(true,"x",2.0,3.0,0.0,5.0));
             curves.push_back(Sigmoid(true,"x",1.5,0.0,0.0,1.0));
+            curves.push_back(Sigmoid(true,"x",2.5,1.0,2.0,4.0));
+            break;
+        case 2:
+            curves.push_back(Sigmoid(true,"x",2.0,0.0,0.0,1.0));
+            curves.push_back(Sigmoid(false,"x",2.0,3.0,0.0,5.0));
+            curves.push_back(Sigmoid(false,"x",2.0,0.0,1.0,2.0,true));
             curves.push_back(Sigmoid(true,"x",2.5,1.0,2.0,4.0));
             break;
     }
@@ -547,12 +553,12 @@ vector<Sigmoid> generateTestingCurves(int whichCase) {
 
 int main() {
 
-    int testingCase = 1;
+    int testingCase = 2;
     vector<double> segmentsPoints;
     vector<Sigmoid> curves = generateTestingCurves(testingCase);
 
     segmentsPoints = computeRampFunctions(curves,1,0);
-    segmentsPoints = computeRampFunctions(curves,10,0);
+    segmentsPoints = computeRampFunctions(curves,12,0);
 
     for(int j = 0; j < curves.size(); j++) {
         stringstream ss;

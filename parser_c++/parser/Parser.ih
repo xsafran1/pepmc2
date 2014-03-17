@@ -6,14 +6,6 @@
 #include "Parser.h"
 
 
-Parser::Parser(std::istream &in, std::ostream &out) : ParserBase(), d_scanner(in,out) {
-}
-
-Model& Parser::returnStorage() {
-	return storage;
-}
-
-
     // Add below here any includes etc. that are only
     // required for the compilation of Parser's sources.
 
@@ -22,3 +14,13 @@ Model& Parser::returnStorage() {
     // symbols from the namespace std without specifying std::
 //using namespace std;
 
+
+
+Parser::Parser(std::istream &in, std::ostream &out) : ParserBase(), d_scanner(in,out) {
+}
+
+
+
+Model<Parser::valueT>& Parser::returnStorage() {
+	return storage;
+}

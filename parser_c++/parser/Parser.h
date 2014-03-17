@@ -8,17 +8,27 @@
 // $insert scanner.h
 #include "../scanner/Scanner.h"
 
+#include <stack>
 #include "../skusobna_trieda.h"
 #include "../data_model/Model.h"
-#include "../data_model/Normalizer.h"
+#include "../data_model/Entite.h"
+//#include "../data_model/Normalizer.h"
 
 #undef Parser
 class Parser: public ParserBase
 {
     // $insert scannerobject
         Scanner d_scanner;
+
+        typedef double valueT;
         int line_num = 1;
-        Model storage;
+        bool testing = true;
+        bool verbatim = false;
+        bool run = true;
+
+        Model<valueT> storage;
+        valueT paramFirstValue;
+        std::stack<Entite<valueT> > eq;
 
     public:
         int parse();
@@ -26,7 +36,7 @@ class Parser: public ParserBase
         Parser() {}
         Parser(std::istream &in = std::cin, std::ostream &out = std::cout);
 
-        Model& returnStorage();
+        Model<valueT>& returnStorage();
 
     private:
         void error(char const *msg);    // called on (syntax) errors
