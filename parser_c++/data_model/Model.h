@@ -17,8 +17,16 @@ public:
 	void AddConstantName(string constant);
 	void AddConstantValue(value_type constant);
 
-    const std::vector<std::string> getVariables();
-	const std::string getVariable(int index);
+    const std::vector<std::string> getVariables() const;
+	const std::string getVariable(int index) const;
+
+    const std::vector<std::string> getParamNames() const;
+	const std::string getParamName(int index) const;
+    const std::vector<std::pair<value_type, value_type> > getParamRanges() const;
+	const std::pair<value_type, value_type> getParamRange(int index) const;
+
+	const std::vector<std::pair<std::string, value_type> > getConstants() const;
+	const std::pair<std::string, value_type> getConstant(int index) const;
 
 private:
 	std::vector<std::string> var_names;  //variables
@@ -71,11 +79,41 @@ void Model<T>::AddConstantValue(value_type constant)
 }
 
 template <typename T>
-const std::vector<std::string> Model<T>::getVariables() {
+const std::vector<std::string> Model<T>::getVariables() const {
 	return var_names;
 }
 
 template <typename T>
-const std::string Model<T>::getVariable(int index) {
+const std::string Model<T>::getVariable(int index) const {
 	return var_names.at(index);
+}
+
+template <typename T>
+const std::vector<std::string> Model<T>::getParamNames() const {
+    return param_names;
+}
+
+template <typename T>
+const std::string Model<T>::getParamName(int index) const {
+    return param_names.at(index);
+}
+
+template <typename T>
+const std::vector<std::pair<T, T> > Model<T>::getParamRanges() const {
+    return param_ranges;
+}
+
+template <typename T>
+const std::pair<T, T> Model<T>::getParamRange(int index) const {
+    return param_ranges.at(index);
+}
+
+template <typename T>
+const std::vector<std::pair<std::string, T> > Model<T>::getConstants() const {
+    return constants;
+}
+
+template <typename T>
+const std::pair<std::string, T> Model<T>::getConstant(int index) const {
+    return constants.at(index);
 }

@@ -28,6 +28,14 @@ private:
 				res = 1;
 			return negative ? 1 - res : res;
 		}
+
+		friend std::ostream& operator<<(std::ostream& out, const ramp& r) {
+		    if(r.negative)
+                out << "R(-)(" << r.dim << "," << r.min << "," << r.max << "," << r.min_value << "," << r.max_value << ")";
+            else
+                out << "R(+)(" << r.dim << "," << r.min << "," << r.max << "," << r.min_value << "," << r.max_value << ")";
+            return out;
+		}
 	};
 
 	std::vector<ramp> ramps;
@@ -42,6 +50,14 @@ private:
 		int n;
 		bool positive;
 		bool isInverse;
+
+		friend std::ostream& operator<<(std::ostream& out, const sigmoid& s) {
+		    if(!s.positive)
+                out << "S(-)(" << s.dim << "," << s.k << "," << s.theta << "," << s.a << "," << s.b << ")";
+            else
+                out << "S(+)(" << s.dim << "," << s.k << "," << s.theta << "," << s.a << "," << s.b << ")";
+            return out;
+		}
 
 		std::vector<value_type> enumerateYPoints(std::vector<value_type> x)
 		{
@@ -167,15 +183,22 @@ public:
 
 
 
-///////
+///////TODO: nastava problem ked ma parameter index 0 (cize je prvy hned po PARAMS:
 	std::size_t hasParam() const
 	{
 		return (param != 0 ? 1 : 0);
 
 	}
 
+	void negate() {
+	    constant *= -1;
+	}
+
 
 	const Summember<T>  operator*(/*const*/ Summember<T> &);
+
+    template <class U>
+	friend std::ostream& operator<<(std::ostream& out, const Summember<U>& sum);
 
 private:
 	value_type constant;
@@ -183,6 +206,25 @@ private:
 	std::vector<std::size_t> vars;
 
 };
+
+template <class U>
+std::ostream& operator<<(std::ostream& out, const Summember<U>& sum) {
+    out << sum.GetConstant();
+    if(sum.hasParam()) {
+        out << "*" << sum.GetParam();
+    }
+    for(int i = 0; i < sum.GetVars().size(); i++) {
+        out << "*" << sum.GetVars().at(i);
+    }
+    for(int i = 0; i < sum.GetRamps().size(); i++) {
+        out << "*" << sum.GetRamps().at(i);
+    }
+    for(int i = 0; i < sum.GetSigmoids().size(); i++) {
+        out << "*" << sum.GetSigmoids().at(i);
+    }
+
+    return out;
+}
 
 template <typename T>
 const Summember<T> Summember<T>::operator*(/*const*/ Summember<T> & s2)

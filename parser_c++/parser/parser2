@@ -183,7 +183,8 @@ eq_defs:		eq_var '=' expr	    {
                                             while(!eq.empty()) {
                                                 Entite<Parser::valueT> ent = eq.top();
                                                 std::cout << "-----New Entite-----\n";
-                                                    std::cout << "ent has " << ent.GetSummembers().size() << " summembers\n";
+                                                    //std::cout << "ent has " << ent.GetSummembers().size() << " summembers\n";
+                                                    std::cout << ent << std::endl;
                                                 eq.pop();
                                             }
                                         }
@@ -209,7 +210,7 @@ expr:		ap
 ap:		NUMBER		{
                         if(testing) std::cout << "c\t" << d_scanner.matched() << std::endl;
                         if(run) {
-                            Entite<Parser::valueT> ent;
+                            Entite<Parser::valueT> ent(storage);
                             ent.PutNumber(d_scanner.matched());
                             eq.push(ent);
                         }
@@ -217,7 +218,7 @@ ap:		NUMBER		{
 	|	NAME		{
                         if(testing) std::cout << "v\t" << d_scanner.matched() << std::endl;
                         if(run) {
-                            Entite<Parser::valueT> ent;
+                            Entite<Parser::valueT> ent(storage);
                             ent.PutString(d_scanner.matched());
                             eq.push(ent);
                         }
@@ -225,7 +226,7 @@ ap:		NUMBER		{
 	|	RAMP		{
                         if(testing) std::cout << "r\t" << d_scanner.matched() << std::endl;
                         if(run) {
-                            Entite<Parser::valueT> ent;
+                            Entite<Parser::valueT> ent(storage);
                             std::string matched = d_scanner.matched();
                             size_t startPos = 0;
                             size_t endPos = matched.find_first_of("(");
@@ -261,7 +262,7 @@ ap:		NUMBER		{
 	|	SIGM		{
                         if(testing) std::cout << "s\t" << d_scanner.matched() << std::endl;
                         if(run) {
-                            Entite<Parser::valueT> ent;
+                            Entite<Parser::valueT> ent(storage);
                             std::string matched = d_scanner.matched();
                             size_t startPos = 0;
                             size_t endPos = matched.find_first_of("(");
@@ -306,7 +307,7 @@ ap:		NUMBER		{
 	|	STEP		{
                         if(testing) std::cout << "h\t" << d_scanner.matched() << std::endl;
 						if(run) {
-                            Entite<Parser::valueT> ent;
+                            Entite<Parser::valueT> ent(storage);
                             std::string matched = d_scanner.matched();
                             size_t startPos = 0;
                             size_t endPos = matched.find_first_of("(");
@@ -333,24 +334,25 @@ ap:		NUMBER		{
                     }
 
     |   '-' NUMBER	{
-                        if(testing) std::cout << "c\t" << d_scanner.matched() << std::endl;
+                        if(testing) std::cout << "c\t-" << d_scanner.matched() << std::endl;
                         if(run) {
-                            Entite<Parser::valueT> ent;
-                            ent.PutNumber(string("-"+d_scanner.matched()));         //TODO: asi trochu inak
+                            Entite<Parser::valueT> ent(storage);
+                            ent.PutNumber(string(d_scanner.matched()));
+                            ent.negate();
                             eq.push(ent);
                         }
                     }
 	|	'-' NAME	{
-                        if(testing) std::cout << "v\t" << d_scanner.matched() << std::endl;
+                        if(testing) std::cout << "v\t-" << d_scanner.matched() << std::endl;
                     }
 	|	'-' RAMP	{
-                        if(testing) std::cout << "r\t" << d_scanner.matched() << std::endl;
+                        if(testing) std::cout << "r\t-" << d_scanner.matched() << std::endl;
                     }
 	|	'-' SIGM	{
-                        if(testing) std::cout << "s\t" << d_scanner.matched() << std::endl;
+                        if(testing) std::cout << "s\t-" << d_scanner.matched() << std::endl;
                     }
 	|	'-' STEP	{
-                        if(testing) std::cout << "h\t" << d_scanner.matched() << std::endl;
+                        if(testing) std::cout << "h\t-" << d_scanner.matched() << std::endl;
                     }
 ;
 
@@ -377,6 +379,14 @@ summation:      summant                     {
                                             }
     |           summation '-' summant       {
                                                 if(verbatim) std::cout << "summation -> summation - summant\n";
+                                                if(run) {
+                                                    Entite<Parser::valueT> temp = eq.top();
+                                                    eq.pop();
+                                                    temp.negate();
+                                                    Entite<Parser::valueT> ent = eq.top() + temp;
+                                                    eq.pop();
+                                                    eq.push(ent);
+                                                }
                                             }
 ;
 
