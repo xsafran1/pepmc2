@@ -4,9 +4,9 @@
 DIGIT		    [0-9]
 DIGIT1		    [1-9]
 CHAR		    [a-zA-Z]
-ALNUM		    [_0-9a-zA-Z-]
+ALNUM		    [_0-9a-zA-Z]
 REAL_NUMBER     [0-9]+([\.][0-9]+)?
-CHAR_STRING     [a-zA-Z]+[_0-9a-zA-Z-]*
+CHAR_STRING     [a-zA-Z]+[_0-9a-zA-Z~{}]*
 
 
 %%
@@ -87,8 +87,6 @@ CHAR_STRING     [a-zA-Z]+[_0-9a-zA-Z-]*
 \*			|
 \(			|
 \)			|
-\[			|
-\]			|
 \=			|
 \+			    {
                     column_num += length();

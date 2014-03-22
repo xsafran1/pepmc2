@@ -2,7 +2,12 @@
 
 #include <string>
 #include <stdexcept>
+#include <cmath>
 #include "Summember.h"
+#include "Model.h"
+
+
+typedef unsigned int uint;
 
 template <typename T>
 class Entite;
@@ -14,13 +19,11 @@ public:
 	typedef T value_type;
 
 
+
     //Entite() {}
-	Entite(const Model<T> & model) : model(model) {}
+	Entite(Model<T> & model) : model(model) {}
 
 	// Access methods
-
-	void PutLeftParenthesis();
-	void PutRightParenthesis();
 	void PutString(std::string str);
 	void PutNumber(std::string number);
 
@@ -44,7 +47,12 @@ public:
 	{
 		return summembers;
 	}
-
+/*
+	Summember<T> * GetSigmoid() //const
+	{
+		return sigmoids.pop_back();
+	}
+*/
 	void AddSummember(Summember<T> const & sm)
 	{
 		summembers.push_back(sm);
@@ -71,7 +79,7 @@ public:
 	}
 
 	void negate() {
-	    for(int i = 0 ; i < size(); i++) {
+	    for(uint i = 0 ; i < size(); i++) {
 	        summembers.at(i).negate();
 	    }
 	}
@@ -96,10 +104,11 @@ private:
 	T getNumberFromString(std::string s);
 
 
-    const Model<T> & model;
+    Model<T> & model;
 	//std::vector<std::string> var_names;  //variables
 	//std::vector<std::string> param_names;  //params
 	//std::vector<std::string> constant_names;  //constants
+
 
 	std::vector<Summember<T> > summembers;
 };
@@ -109,8 +118,8 @@ T Entite<T>::getNumberFromString(std::string s) {
     T result;
     try {
         result = (T)std::stod(s);
-    } catch(std::invalid_argument& e) {
-        for(int i = 0; i < model.getConstants().size(); i++) {
+    } catch(std::invalid_argument& ) {
+        for(uint i = 0; i < model.getConstants().size(); i++) {
 	        if(s.compare(model.getConstant(i).first) == 0) {
 	            result = model.getConstant(i).second;
 	            break;
@@ -129,13 +138,13 @@ void Entite<T>::PutString(std::string str)
 
     for(; i < model.getVariables().size(); i++) {
         if(str.compare(model.getVariable(i)) == 0) {
-            PutVar(i);
+            PutVar(i+1);
             run = 0;
             break;
         }
     }
     /*
-    //-------NETUSIM PROC ALE PROSTE TO HADZE SEGMENTATION FAULT----------------
+    //-------NETUSIM PROC ALE TEN ITERATOR PROSTE HADZE SEGMENTATION FAULT----------------
 
 	for (typename std::vector<std::string>::const_iterator it = model.getVariables().begin(); it != model.getVariables().end(); it++)
 	{
@@ -152,7 +161,7 @@ void Entite<T>::PutString(std::string str)
 
 	    for(i = 0; i < model.getParamNames().size(); i++) {
 	        if(str.compare(model.getParamName(i)) == 0) {
-	            PutParam(i);
+	            PutParam(i+1);
 	            run = 0;
 	            break;
 	        }
@@ -174,7 +183,7 @@ void Entite<T>::PutString(std::string str)
 	if (1 == run) {
 	    for(i = 0; i < model.getConstants().size(); i++) {
 	        if(str.compare(model.getConstant(i).first) == 0) {
-	            PutConst(i);
+	            PutConst(i+1);
 	            run = 0;
 	            break;
 	        }
@@ -200,7 +209,7 @@ void Entite<T>::PutString(std::string str)
 template <typename T>
 void Entite<T>::PutNumber(std::string number)
 {
-	double cc = std::stod(number);       // zmenil som constant na number pretoze to bola asi chyba
+	double cc = std::stod(number);
 	T c = (T)cc;
 
 	Summember<T> new_summember;
@@ -241,9 +250,9 @@ void Entite<T>::PutRp(std::string var, std::string theta1, std::string theta2, s
     T y1 = getNumberFromString(theta1) * getNumberFromString(a) + getNumberFromString(b);
     T y2 = getNumberFromString(theta2) * getNumberFromString(a) + getNumberFromString(b);
     Summember<T> new_summember;
-    for(int i = 0; i < model.getVariables().size(); i++) {
+    for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
-            new_summember.AddRamp(i,getNumberFromString(theta1),getNumberFromString(theta2),y1,y2,false);
+            new_summember.AddRamp(i+1,getNumberFromString(theta1),getNumberFromString(theta2),y1,y2,false);
             AddSummember(new_summember);
             return;
         }
@@ -251,7 +260,7 @@ void Entite<T>::PutRp(std::string var, std::string theta1, std::string theta2, s
     //TODO: i dont know what will happen if var wasn't find in variables
 
 
-    //TOD: only for testing (TO DELETE LATER)
+    //TODO: only for testing (TO DELETE LATER)
     new_summember.AddRamp(9999,getNumberFromString(theta1),getNumberFromString(theta2),y1,y2,false);
     AddSummember(new_summember);
 }
@@ -262,9 +271,9 @@ void Entite<T>::PutRm(std::string var, std::string theta1, std::string theta2, s
     T y1 = getNumberFromString(theta1) * getNumberFromString(a) + getNumberFromString(b);
     T y2 = getNumberFromString(theta2) * getNumberFromString(a) + getNumberFromString(b);
     Summember<T> new_summember;
-    for(int i = 0; i < model.getVariables().size(); i++) {
+    for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
-            new_summember.AddRamp(i,getNumberFromString(theta1),getNumberFromString(theta2),y1,y2,true);
+            new_summember.AddRamp(i+1,getNumberFromString(theta1),getNumberFromString(theta2),y1,y2,true);
             AddSummember(new_summember);
             return;
         }
@@ -281,9 +290,9 @@ template <typename T>
 void Entite<T>::PutRpCoor(std::string var, std::string theta1, std::string theta2, std::string y1, std::string y2)
 {
     Summember<T> new_summember;
-    for(int i = 0; i < model.getVariables().size(); i++) {
+    for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
-            new_summember.AddRamp(i,getNumberFromString(theta1),getNumberFromString(theta2),getNumberFromString(y1),getNumberFromString(y2),false);
+            new_summember.AddRamp(i+1,getNumberFromString(theta1),getNumberFromString(theta2),getNumberFromString(y1),getNumberFromString(y2),false);
             AddSummember(new_summember);
             return;
         }
@@ -300,9 +309,9 @@ template <typename T>
 void Entite<T>::PutRmCoor(std::string var, std::string theta1, std::string theta2, std::string y1, std::string y2)
 {
     Summember<T> new_summember;
-    for(int i = 0; i < model.getVariables().size(); i++) {
+    for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
-            new_summember.AddRamp(i,getNumberFromString(theta1),getNumberFromString(theta2),getNumberFromString(y1),getNumberFromString(y2),true);
+            new_summember.AddRamp(i+1,getNumberFromString(theta1),getNumberFromString(theta2),getNumberFromString(y1),getNumberFromString(y2),true);
             AddSummember(new_summember);
             return;
         }
@@ -315,23 +324,102 @@ void Entite<T>::PutRmCoor(std::string var, std::string theta1, std::string theta
 }
 
 template <typename T>
-void Entite<T>::PutSp(std::string points, std::string var, std::string k, std::string theta1, std::string a, std::string b)
+void Entite<T>::PutSp(std::string points, std::string var, std::string k, std::string theta, std::string a, std::string b)
 {
+    Summember<T> new_summember;
+    for(uint i = 0; i < model.getVariables().size(); i++) {
+        if(var.compare(model.getVariable(i)) == 0) {
+
+            model.AddSigmoid((size_t)getNumberFromString(points),i+1,getNumberFromString(k),getNumberFromString(theta),getNumberFromString(a),getNumberFromString(b));
+			new_summember.AddSigmoid(model.GetSigmoidsSize());
+			AddSummember(new_summember);
+            return;
+        }
+    }
+    //TODO: i dont know what will happen if var wasn't find in variables
+
+    //TOD: only for testing (TO DELETE LATER)
+    model.AddSigmoid((size_t)getNumberFromString(points),9999,getNumberFromString(k),getNumberFromString(theta),getNumberFromString(a),getNumberFromString(b));
+	new_summember.AddSigmoid(model.GetSigmoidsSize());
+    AddSummember(new_summember);
 }
 
 template <typename T>
-void Entite<T>::PutSm(std::string points, std::string var, std::string k, std::string theta1, std::string a, std::string b)
+void Entite<T>::PutSm(std::string points, std::string var, std::string k, std::string theta, std::string a, std::string b)
 {
+    Summember<T> new_summember;
+    for(uint i = 0; i < model.getVariables().size(); i++) {
+        if(var.compare(model.getVariable(i)) == 0) {
+            model.AddSigmoid((size_t)getNumberFromString(points),i+1,getNumberFromString(k),getNumberFromString(theta),getNumberFromString(b),getNumberFromString(a));
+			new_summember.AddSigmoid(model.GetSigmoidsSize());
+            AddSummember(new_summember);
+            return;
+        }
+    }
+    //TODO: i dont know what will happen if var wasn't find in variables
+
+    //TOD: only for testing (TO DELETE LATER)
+    model.AddSigmoid((size_t)getNumberFromString(points),9999,getNumberFromString(k),getNumberFromString(theta),getNumberFromString(b),getNumberFromString(a));
+	new_summember.AddSigmoid(model.GetSigmoidsSize());
+    AddSummember(new_summember);
 }
 
 template <typename T>
-void Entite<T>::PutSpInv(std::string points, std::string var, std::string k, std::string theta1, std::string a, std::string b)
+void Entite<T>::PutSpInv(std::string points, std::string var, std::string k, std::string theta, std::string a, std::string b)
 {
+    T kk = getNumberFromString(k);
+    T aa = getNumberFromString(a);
+    T bb = getNumberFromString(b);
+    Summember<T> new_summember;
+    for(uint i = 0; i < model.getVariables().size(); i++) {
+        if(var.compare(model.getVariable(i)) == 0) {
+            model.AddSigmoid((size_t)getNumberFromString(points),
+                                     i+1,
+                                     kk,
+                                     getNumberFromString(theta) + log(aa/bb)/(2*kk),
+                                     1/aa,
+                                     1/bb
+                                     );
+			new_summember.AddSigmoid(model.GetSigmoidsSize());
+            AddSummember(new_summember);
+            return;
+        }
+    }
+    //TODO: i dont know what will happen if var wasn't find in variables
+
+    //TOD: only for testing (TO DELETE LATER)
+    model.AddSigmoid((size_t)getNumberFromString(points),9999,kk,getNumberFromString(theta) + log(aa/bb)/(2*kk),1/aa,1/bb);
+	new_summember.AddSigmoid(model.GetSigmoidsSize());
+    AddSummember(new_summember);
 }
 
 template <typename T>
-void Entite<T>::PutSmInv(std::string points, std::string var, std::string k, std::string theta1, std::string a, std::string b)
+void Entite<T>::PutSmInv(std::string points, std::string var, std::string k, std::string theta, std::string a, std::string b)
 {
+    T kk = getNumberFromString(k);
+    T aa = getNumberFromString(b);          // Very important change: a = b
+    T bb = getNumberFromString(a);          // Very important change: b = a
+    Summember<T> new_summember;
+    for(uint i = 0; i < model.getVariables().size(); i++) {
+        if(var.compare(model.getVariable(i)) == 0) {
+            model.AddSigmoid((size_t)getNumberFromString(points),
+                                     i+1,
+                                     kk,
+                                     getNumberFromString(theta) + log(aa/bb)/(2*kk),
+                                     1/aa,
+                                     1/bb
+                                     );
+			new_summember.AddSigmoid(model.GetSigmoidsSize());
+			AddSummember(new_summember);
+            return;
+        }
+    }
+    //TODO: i dont know what will happen if var wasn't find in variables
+
+    //TOD: only for testing (TO DELETE LATER)
+    model.AddSigmoid((size_t)getNumberFromString(points),9999,kk,getNumberFromString(theta) + log(aa/bb)/(2*kk),1/aa,1/bb);
+	new_summember.AddSigmoid(model.GetSigmoidsSize());
+    AddSummember(new_summember);
 }
 
 template <typename T>
@@ -397,7 +485,7 @@ template <class U>
 std::ostream& operator<<(std::ostream& out, const Entite<U>& e) {
     if(!e.empty())
         out << e[0];
-    for(int i = 1; i < e.size(); i++) {
+    for(uint i = 1; i < e.size(); i++) {
         out << " + " << e[i];
     }
     return out;

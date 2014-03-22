@@ -10,7 +10,7 @@ CONSTS:k,0.634634;l,2389.0;m,0
 
 PARAMS:a,0.1,1;b,0.5,10.000;c,2.8,3.45          /* toto su parametre so zadanym intervalom */
 
-EQ:X = 0.1*X*X1 + (-10)*(X + Hp(z,theta42,a_a-7b))
+EQ:X = 0.1*X*X1 + (-10)*(X + Hp(z,theta42,a_a7b))
 EQ:X1 = 100000*X + (-10)*X1 - sp[jemnost](x,k4,t_15,j,i)
 EQ: x_ = 5.48537 + y01 + 0.34268*(rmcoor(x,734,9,6.328492735,0.235577))
 EQ: x5 = y-4 - 5.3646*(	sminv[834697](x,5,43564573,0000.567457,7))

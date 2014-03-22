@@ -330,7 +330,6 @@ vector <double>  generateXPoints (double ai, double bi, int num_segments)
 	   }
 
 	   return x;
-
 }
 
 
@@ -411,13 +410,14 @@ public:
         double tempB = b;
 
         if(isInverse) {
-            if(positive) {
+            if(!positive) {
                 tempA = b;
                 tempB = a;
             }
 
             for(int i = 0; i < x.size(); i++) {
-                y.push_back((1/tempA) + ((1/tempB) - (1/tempA))*((1 + tanh(k*(x.at(i) - (theta + log(tempB/tempA)/(2*k)))))*0.5));
+                //y.push_back((1/tempA) + ((1/tempB) - (1/tempA))*((1 + tanh(k*(x.at(i) - (theta + log(tempB/tempA)/(2*k)))))*0.5));
+                y.push_back(1/(tempA + (tempB - tempA)*((1 + tanh(k*(x.at(i) - theta)))*0.5)));
             }
 
         } else {
@@ -482,7 +482,7 @@ vector<vector<double> > generateSpace(vector<Sigmoid> s, vector<double> &x, int 
 
 
 
-vector<double> computeRampFunctions(vector<Sigmoid> s, int numOfSegments, int numOfX = 0) {
+vector<double> computeThresholds(vector<Sigmoid> s, int numOfSegments, int numOfX = 0) {
 
     int defaultNumOfSegments = 1;
 
@@ -545,20 +545,39 @@ vector<Sigmoid> generateTestingCurves(int whichCase) {
             curves.push_back(Sigmoid(false,"x",2.0,0.0,1.0,2.0,true));
             curves.push_back(Sigmoid(true,"x",2.5,1.0,2.0,4.0));
             break;
+        case 3:
+            //curves.push_back(Sigmoid(true,"x",1.0,2.0 + log(3.0/4.0)/2,1/4.0,1/3.0));         //skupina 4
+            //curves.push_back(Sigmoid(false,"x",1.0,2.0 + log(3.0/4.0)/2,1/3.0,1/4.0));        //skupina 4
+            //curves.push_back(Sigmoid(false,"x",1.0,2.0,3.0,4.0,true));                       //skupina 1
+            //curves.push_back(Sigmoid(true,"x",1.0,2.0 + log(4.0/3.0)/2,1/4.0,1/3.0));       //skupina 1
+            //curves.push_back(Sigmoid(false,"x",1.0,2.0 + log(4.0/3.0)/2,1/3.0,1/4.0));      //skupina 1
+            curves.push_back(Sigmoid(true,"x",1.0,2.0,3.0,4.0,true));                       //skupina 3
+            curves.push_back(Sigmoid(false,"x",1.0,2.0 + log(3.0/4.0)/2,1/4.0,1/3.0));      //skupina 3
+            curves.push_back(Sigmoid(true,"x",1.0,2.0 + log(3.0/4.0)/2,1/3.0,1/4.0));       //skupina 3
+            //curves.push_back(Sigmoid(true,"x",1.0,2.0 + log(4.0/3.0)/2,1/3.0,1/4.0));         //skupina 2
+            //curves.push_back(Sigmoid(false,"x",1.0,2.0 + log(4.0/3.0)/2,1/4.0,1/3.0));        //skupina 2
+            //curves.push_back(Sigmoid(false,"x",1.0,2.0,3.0,4.0));
+            //curves.push_back(Sigmoid(true,"x",1.0,2.0,4.0,3.0));
+            break;
     }
     return curves;
 }
 
-
+void computeRampFunctions() {
+    // dostane alebo si zoberie priamo ako class method vector so vsetkymi sigmoidami a rozdeli ich podla Vars do skupin
+    // postupne vsetky skupiny sigmoidov posle funkcii comuteThresholds, ktore zaroven ulozi medzi ostatne thresholdy
+    // nasledne podla tychto novych thresholdov vytvori rampy pre vsetky sigmoidy zo skupiny a ulozi medzi rampy
+    // nakoniec mozno zmaze sigmoidy ak uz nebudu treba
+}
 
 int main() {
 
-    int testingCase = 2;
+    int testingCase = 3;
     vector<double> segmentsPoints;
     vector<Sigmoid> curves = generateTestingCurves(testingCase);
 
-    segmentsPoints = computeRampFunctions(curves,1,0);
-    segmentsPoints = computeRampFunctions(curves,12,0);
+    segmentsPoints = computeThresholds(curves,1,0);
+    segmentsPoints = computeThresholds(curves,12,0);
 
     for(int j = 0; j < curves.size(); j++) {
         stringstream ss;

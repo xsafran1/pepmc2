@@ -12,7 +12,7 @@
 #include "../skusobna_trieda.h"
 #include "../data_model/Model.h"
 #include "../data_model/Entite.h"
-//#include "../data_model/Normalizer.h"
+
 
 #undef Parser
 class Parser: public ParserBase
@@ -25,6 +25,7 @@ class Parser: public ParserBase
         bool testing = true;
         bool verbatim = false;
         bool run = true;
+        bool wasEQ = false;
 
         Model<valueT> storage;
         valueT paramFirstValue;

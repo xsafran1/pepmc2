@@ -1,13 +1,12 @@
 #pragma once
 #include <vector>
+#include <algorithm>
 
 template <typename T>
 class Summember
 {
 public:
 	typedef T value_type;
-
-private:
 
 	struct ramp
 	{
@@ -17,6 +16,12 @@ private:
 		value_type min_value;
 		value_type max_value;
 		bool negative;
+
+        ramp() {}
+		ramp(std::size_t dim, value_type min, value_type max, value_type minValue, value_type maxValue, bool negative = false)
+                    : dim(dim), min(min), max(max), min_value(minValue), max_value(maxValue), negative(negative) {}
+        ramp(const ramp& r) : dim(r.dim), min(r.min), max(r.max), min_value(r.min_value), max_value(r.max_value), negative(r.negative) {}
+
 
 		value_type value(value_type value) const
 		{
@@ -38,8 +43,10 @@ private:
 		}
 	};
 
-	std::vector<ramp> ramps;
+private:
 
+	std::vector<ramp> ramps;
+	/*
 	struct sigmoid
 	{
 		std::size_t dim;
@@ -47,15 +54,15 @@ private:
 		value_type theta;
 		value_type a;
 		value_type b;
-		int n;
+		std::size_t n;
 		bool positive;
 		bool isInverse;
 
 		friend std::ostream& operator<<(std::ostream& out, const sigmoid& s) {
 		    if(!s.positive)
-                out << "S(-)(" << s.dim << "," << s.k << "," << s.theta << "," << s.a << "," << s.b << ")";
+                out << "S(-)[" << s.n << "](" << s.dim << "," << s.k << "," << s.theta << "," << s.a << "," << s.b << ")";
             else
-                out << "S(+)(" << s.dim << "," << s.k << "," << s.theta << "," << s.a << "," << s.b << ")";
+                out << "S(+)[" << s.n << "](" << s.dim << "," << s.k << "," << s.theta << "," << s.a << "," << s.b << ")";
             return out;
 		}
 
@@ -66,13 +73,14 @@ private:
 			value_type tempB = b;
 
 			if (isInverse) {
-				if (positive) {
+				if (!positive) {
 					tempA = b;
 					tempB = a;
 				}
 
 				for (int i = 0; i < x.size(); i++) {
-					y.push_back((1 / tempA) + ((1 / tempB) - (1 / tempA))*((1 + tanh(k*(x.at(i) - (theta + log(tempB / tempA) / (2 * k)))))*0.5));
+					//y.push_back((1 / tempA) + ((1 / tempB) - (1 / tempA))*((1 + tanh(k*(x.at(i) - (theta + log(tempB / tempA) / (2 * k)))))*0.5));
+					y.push_back(1/(tempA + (tempB - tempA)*((1 + tanh(k*(x.at(i) - theta)))*0.5)));
 				}
 
 			}
@@ -91,7 +99,17 @@ private:
 
 	};
 
-	std::vector<sigmoid> sigmoids;
+	std::vector<int> sigmoids;
+	*/
+
+	struct step {
+	    std::size_t dim;
+	    value_type theta;
+	    value_type accuracy;
+	    bool positive;
+	};
+
+	std::vector<step> steps;
 
 
 public:
@@ -125,7 +143,7 @@ public:
 		return ramps;
 	}
 
-	std::vector<sigmoid> GetSigmoids() const
+	std::vector<std::size_t> GetSigmoids() const
 	{
 		return sigmoids;
 	}
@@ -162,10 +180,12 @@ public:
 	{
 		ramps.push_back(new_ramp);
 	}
-
-	void AddSigmoid(std::size_t dim, value_type k, value_type theta, value_type a, value_type b, bool positive = 1, bool isInverse = 0)
+	/*
+	void AddSigmoid(std::size_t segments,std::size_t dim, value_type k, value_type theta,
+                    value_type a, value_type b, bool positive = 1, bool isInverse = 0)
 	{
 		sigmoid s;
+		s.n = segments;
 		s.dim = dim;
 		s.k = k;
 		s.theta = theta;
@@ -180,7 +200,27 @@ public:
 	{
 		sigmoids.push_back(new_sigmoid);
 	}
+	*/
 
+	void AddSigmoid(std::size_t s)
+	{
+		sigmoids.push_back(s);
+	}
+
+
+
+	void AddStep(std::size_t dim, value_type theta, value_type accuracy, bool positive = 1) {
+	    step s;
+	    s.dim = dim;
+	    s.theta = theta;
+	    s.accuracy = accuracy;
+	    s.positive = positive;
+	    steps.push_back(s);
+	}
+
+	void AddStep(step& new_step) {
+	    steps.push_back(new_step);
+	}
 
 
 ///////TODO: nastava problem ked ma parameter index 0 (cize je prvy hned po PARAMS:
@@ -194,6 +234,8 @@ public:
 	    constant *= -1;
 	}
 
+	std::vector< Summember<T> > sigmoidAbstraction(std::vector<ramp> ramps, std::size_t replacedSigmoid /*value not his index*/);
+
 
 	const Summember<T>  operator*(/*const*/ Summember<T> &);
 
@@ -204,8 +246,34 @@ private:
 	value_type constant;
 	std::size_t param;
 	std::vector<std::size_t> vars;
+	std::vector<std::size_t> sigmoids;
 
 };
+
+
+template <typename T>
+std::vector< Summember<T> > Summember<T>::sigmoidAbstraction(std::vector<ramp> ramps, std::size_t replacedSigmoid) {
+
+    std::vector< Summember<T> > result;
+    std::cout << "removing sigmoid with index " << replacedSigmoid-1 << " and size before is " << sigmoids.size() <<"\n";
+    for(std::vector<std::size_t>::iterator it = sigmoids.begin(); it != sigmoids.end(); it++) {
+        if(*it == replacedSigmoid) {
+            sigmoids.erase(it);
+            break;
+        }
+    }
+    //remove(this->sigmoids.begin(), this->sigmoids.end(), replacedSigmoid);
+    std::cout << "size after is " << sigmoids.size() << "\n";
+
+    for(int r = 0; r < ramps.size(); r++) {
+        Summember<T> sum;
+        sum.AddRamp(ramps.at(r));
+        result.push_back(sum * (*this));
+    }
+
+    return result;
+}
+
 
 template <class U>
 std::ostream& operator<<(std::ostream& out, const Summember<U>& sum) {
@@ -213,13 +281,13 @@ std::ostream& operator<<(std::ostream& out, const Summember<U>& sum) {
     if(sum.hasParam()) {
         out << "*" << sum.GetParam();
     }
-    for(int i = 0; i < sum.GetVars().size(); i++) {
+    for(uint i = 0; i < sum.GetVars().size(); i++) {
         out << "*" << sum.GetVars().at(i);
     }
-    for(int i = 0; i < sum.GetRamps().size(); i++) {
+    for(uint i = 0; i < sum.GetRamps().size(); i++) {
         out << "*" << sum.GetRamps().at(i);
     }
-    for(int i = 0; i < sum.GetSigmoids().size(); i++) {
+    for(uint i = 0; i < sum.GetSigmoids().size(); i++) {
         out << "*" << sum.GetSigmoids().at(i);
     }
 
@@ -270,13 +338,13 @@ const Summember<T> Summember<T>::operator*(/*const*/ Summember<T> & s2)
 		s_final.AddRamp(*it);
 	}
 
-	std::vector<sigmoid> sigmoids1 = s1.GetSigmoids();
-	for (typename std::vector<sigmoid>::iterator it = sigmoids1.begin(); it != sigmoids1.end(); it++) {
+	std::vector<std::size_t> sigmoids1 = s1.GetSigmoids();
+	for (typename std::vector<std::size_t>::iterator it = sigmoids1.begin(); it != sigmoids1.end(); it++) {
 		s_final.AddSigmoid(*it);
 	}
 
-	std::vector<sigmoid> sigmoids2 = s2.GetSigmoids();
-	for (typename std::vector<sigmoid>::iterator it = sigmoids2.begin(); it != sigmoids2.end(); it++) {
+	std::vector<std::size_t> sigmoids2 = s2.GetSigmoids();
+	for (typename std::vector<std::size_t>::iterator it = sigmoids2.begin(); it != sigmoids2.end(); it++) {
 		s_final.AddSigmoid(*it);
 	}
 

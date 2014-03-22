@@ -1,1 +1,2 @@
-EQ: x = Rm(y_01,0,1,4,5)
+VARS: x, y
+EQ: x = Spinv(y,1,2,3,4)*Sp(x,1,2,3,4) + Sminv(x,1,2,3,4)

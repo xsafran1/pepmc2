@@ -4,15 +4,17 @@
 VARS:x,y
 
 //toto su konstanty
-CONSTS:k1,0.634634;l2,2389.0;m3,0
+CONSTS:k1,0.634634;l2,0.2389;m3,0
 
 
 PARAMS:a,0.1,1;b,0.5,10.000;c,2.8,3.45          /* toto su parametre so zadanym intervalom */
 
 EQ: x = (-0.6)*x + b*0.00007
-EQ: y = (-0.5)*y + 0.00006*a
-EQ:x = 0.1*x*y + (-10)*(x + rp(x,42,k1,l2,m3))
+EQ: y = -0.5*y + 0.00006*a
+EQ:x = 0.1*x*y + -10*(x + rp(x,42,k1,l2,m3))
+EQ:x = 0.1*x*y + -10*(x + sp[13](x,42,k1,l2,m3) + sminv[14](x,12.5,l2,7,0.12637))
 
+VAR_POINTS: x: 500, 12; y: 400, 8
 
 THRES:x:0.0001, 0.5, 1
 THRES:y:0.0001,0.3,0.5
