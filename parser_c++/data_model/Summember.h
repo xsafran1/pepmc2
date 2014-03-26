@@ -33,7 +33,7 @@ public:
 				res = 1;
 			return negative ? 1 - res : res;
 		}
-
+		
 		friend std::ostream& operator<<(std::ostream& out, const ramp& r) {
 		    if(r.negative)
                 out << "R(-)(" << r.dim << "," << r.min << "," << r.max << "," << r.min_value << "," << r.max_value << ")";
@@ -41,6 +41,9 @@ public:
                 out << "R(+)(" << r.dim << "," << r.min << "," << r.max << "," << r.min_value << "," << r.max_value << ")";
             return out;
 		}
+		
+
+
 	};
 
 private:

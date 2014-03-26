@@ -1757,7 +1757,7 @@ try
 
 
     // get the error state
-    while (not (s_state[top__()][0].d_type & ERR_ITEM))
+    while (! (s_state[top__()][0].d_type & ERR_ITEM))
     {
         pop__();
     }
