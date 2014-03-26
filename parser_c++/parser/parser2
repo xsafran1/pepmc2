@@ -112,7 +112,7 @@ init_defs:      init_def
     |           init_defs ';' init_def
 ;
 
-init_def:       init_name ',' init_interval     {
+init_def:       init_name ':' init_interval     {
                                                     if(testing) std::cout << '\n';
                                                 }
 ;

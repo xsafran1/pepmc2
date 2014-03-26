@@ -751,6 +751,9 @@ std::vector<std::vector<double> > Model<T>::generateSpace(std::vector<std::size_
             }
         }
 
+        if(min < 0.0)
+            min = 0.0;
+
         if(numOfX != 0) {
             x = generateXPoints(min, max, numOfX);
         } else {
