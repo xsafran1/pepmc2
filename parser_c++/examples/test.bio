@@ -4,7 +4,7 @@
 VARS:x,y
 
 //toto su konstanty
-CONSTS:k1,0.634634;l2,0.2389;m3,0
+CONSTS:k1,1.634634;l2,0.2389;m3,0
 
 
 PARAMS:a,0.1,1;b,0.5,10.000;c,2.8,3.45          /* toto su parametre so zadanym intervalom */
