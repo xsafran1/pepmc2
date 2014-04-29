@@ -1,0 +1,10 @@
+Compilation of BioDiVinE GUI Simaff:
+
+ - QT version 4.0 or higher (4.x) is needed
+ - BioDiVinE must be compiled before compilation of Simaff
+ - execute commands:
+
+qmake
+make
+
+  - execute ./simaff

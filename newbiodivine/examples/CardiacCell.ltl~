@@ -1,0 +1,4 @@
+#define a U>1
+#define b U<1.55
+
+#property GF( !a || !b )

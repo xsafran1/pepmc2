@@ -1,0 +1,29 @@
+#
+# Testing example, not a real model.
+# Sanity NOT OK
+
+SIGNIFICANCE: 0.3
+ZERORANGE: 1e-9
+#REFINETHRESH: 0
+
+// Aha 
+VARS:x,y,z,a1
+
+EQ:dx = ( -0.5)*x*y + (-.002)*x + 
+    -0.2*y + 0.003 
+EQ:dy=(-0.5)*x*y + (-.05)*y + .003   
+EQ:dz=1+(-1)*z
+EQ:da1=4+(-0.5)*x*z
+
+
+TRES:x:1, 3, 5
+TRES:x:0, 2, 1.5, 1.6
+TRES:y:0, 0.4, 1.2, 1.7, 2.3, 2.5, 3.55, 3.60, 4.8, 5.81, 5.28, 5.35, 6
+TRES:z:0, 0.3, 0.6, 1
+TRES:a1:0, 3, 6, 10
+
+STATICTRESHS:x: 0, 5, 0.1
+
+INIT: 1.5:1.6, 0.4:1.2, 0.3:0.6, 3:6;
+
+system async;

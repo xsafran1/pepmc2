@@ -1,0 +1,21 @@
+This is the package containing BioDiVinE tool (including DiVinE/Library and DiVinE/ToolSet.)
+
+This branch of DiVinE focuses on modeling and analysis of dynamic models of biological systems.
+Currently this is an experimental branch of DiVinE that includes the basic kernel 
+of DiVinE (the DiVinE library) which extended with state-space generator for biological 
+systems. Note that only some of the DiVinE tools are included 
+(in modified version to work with the biological extension).
+
+For more informations see http://anna.fi.muni.cz/genesim/biodivine
+
+For compilation of this package follow the instructions:
+(1) Run 
+    ./autogen
+    make CXXFLAGS='-std=c++11'
+    For success in this step, you need Autoconf 2.61 and Automake 1.10.1 and gcc 4.7
+    If you noticed some problems during ./configure, contact us
+    (sybila@fi.muni.cz) or directly contact creator of this configuration
+    (sven@mail.muni.cz)
+(2) In case of successful configuration run make.
+    In case of any problems, again, contact us.
+    

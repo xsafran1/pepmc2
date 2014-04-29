@@ -1,0 +1,29 @@
+VARS:A,B,C
+
+EQ:A = (-0.5)*A*B
+EQ:B = (-0.5)*A*B
+EQ:C = 0.5*A*B
+
+THRES:A: 0.0001, 6, 10
+THRES:B: 0.0001, 4, 6
+THRES:C: 0.0001, 2, 4, 6
+
+INIT: A:6,10; B:4,6; C:0.0001,2
+
+SIGNIFICANCE: 0.9
+RANDOMIZE: 1
+SELFLOOPS: 0
+//RNDPARAMETER: 1
+
+process LTL_property {
+state q1, q2;
+init q1;
+accept q2;
+trans
+q1 -> q2 { guard not A<0.5; },
+q1 -> q1 {},
+q2 -> q2 { guard not A<0.5; },
+q2 -> q1 {};
+}
+
+system async property LTL_property;

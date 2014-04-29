@@ -1,0 +1,38 @@
+// oscillator model from "Concentration Oscillations in Three Component Reaction Systems" paper of Bayramov
+
+VARS:x,y,z
+
+PARAMS: a, -250,-250
+// kinetic parameters are set w.r.t. to Fig. 1 of the paper (the simulation producing oscillations)
+
+//puvodne - EQ:x = 0.0005 + (-250)*x*y
+EQ:x = 0.0005 + (-250)*x*y
+EQ:y = 0.0001 + (-0.1) *y + (-250)*x*y + 300*y*z
+EQ:z = 250*x*y + (-300)*y*z
+
+THRES:x:0.0001,0.0015,0.002,0.0025,0.004,1.2
+THRES:y:0.0001,0.00095,0.00105,0.002,1
+THRES:z:0.0000001,0.00135,0.00145,1
+
+// initial conditions are set w.r.t. Fig. 1 of the paper: 
+// we establish the initial box by +/- [25%,5%,3.5%] of the point of origin on the respective axis
+// the origin in the paper is [0.002, 0.001, 0.0014]
+
+INIT:x:0.0015,0.002; y:0.00095,0.00105; z:0.00135,0.00145
+ 
+// oscillation on x around the initial concentration:
+//    G ((x>0.002 -> F(x<0.002)) && (x<0.002 -> F(x<0.002)))
+
+process LTL_property {
+state q1, q2, q3;
+init q1;
+accept q2, q3;
+trans
+q1 -> q2 { guard x>0.002 && not x<0.002; },
+q1 -> q3 { guard x<0.002 && not x>0.002; },
+q1 -> q1 {},
+q2 -> q2 { guard not x<0.002; },
+q3 -> q3 { guard not x>0.002; };
+}
+
+system async property LTL_property;

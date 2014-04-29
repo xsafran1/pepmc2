@@ -1,0 +1,24 @@
+VARS:A,B,C
+
+EQ:dA = (-0.1)*A
+EQ:dB = 0.1*A + (-1)*B + 1*C
+EQ:dC = 0.1*A + (1)*B + (-1)*C
+
+# Basic thresholds
+############
+TRES:A:0,5,6,10
+TRES:B:0,3,5
+TRES:C:0,0.5,2,3,5
+
+//STATICTRESHS:A:0,10, 0.25
+//STATICTRESHS:B:0,10, 0.25
+//STATICTRESHS:C:0,10, 0.25
+
+//REFINETRESHS: 1
+//RANDOMIZE: 2
+//RNDPARAMETER: 0.2
+//SELFLOOPS: 0
+
+INIT: 	5:5, 0:3, 2:3
+
+system async;

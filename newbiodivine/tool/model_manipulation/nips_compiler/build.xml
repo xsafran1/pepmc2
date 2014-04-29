@@ -1,0 +1,170 @@
+<project name="NIPS PROMELA Compiler" default="jar">
+
+	<property file="build.properties"/>
+
+	<property name="build" value="build" />
+
+	<path id="classpath.sablecc.run">
+	  <pathelement path="lib/sablecc.jar" />
+	</path>
+	<path id="classpath.xmlvisitor.compile">
+	  <pathelement path="lib/dtdparser121.jar" />
+	</path>
+	<path id="classpath.tasks.run">
+	  <pathelement path="lib/dtdparser121.jar" />
+	  <pathelement path="${build}" />
+	</path>
+	<path id="classpath.all.compile">
+	  <pathelement path="lib/jdom.jar" />
+	</path>
+
+	<tstamp/>
+	<property name="nips_c.archive" value="nips_c-${version}-${DSTAMP}" />  
+	<taskdef classname="org.sablecc.ant.taskdef.Sablecc" name="sablecc" classpathref="classpath.sablecc.run" />
+
+	<target name="init" depends="promela-parser">
+	  <mkdir dir="${build}" />
+          <javac destdir="${build}" srcdir="src" deprecation="on" 
+		 classpathref="classpath.xmlvisitor.compile">
+            <include name="xml/*.java" />
+            <include name="Ast/AstNodesGeneratorTask.java" />
+            <include name="Ast/AstNodesGenerator.java" />
+          </javac>
+          <taskdef classname="xml.XmlVisitorGeneratorTask" name="xmlvisitorgen" classpathref="classpath.tasks.run" />
+          <taskdef classname="Ast.AstNodesGeneratorTask" name="ast-node-generator" classpathref="classpath.tasks.run" />
+	</target>
+
+	<target name="-check-promela-parser">
+	  <uptodate property="promela-parser.notRequired" 
+		    srcfile="src/parser/promela.sablecc"
+		    targetfile="src/parser/promela/parser/parser.dat" />
+	</target>
+	<target name="promela-parser" depends="-check-promela-parser" unless="promela-parser.notRequired">
+	  <sablecc src="src/parser" includes="promela.sablecc" outputdirectory="src" />
+	</target>
+
+	<target name="-check-xmlvisitorgen" depends="init">
+	  <uptodate property="xmlvisitorgen.notRequired" 
+		    srcfile="src/xml/promela-ast.dtd"
+		    targetfile=".stamp-xmlvisitorgen" />
+	</target>
+	<target name="xmlvisitorgen" depends="init, -check-xmlvisitorgen" unless="xmlvisitorgen.notRequired"
+		description="Generates XML visitor">
+	  <mkdir dir="src/xml/visitor" />
+	  <xmlvisitorgen dtd="src/xml/promela-ast.dtd" classname="PromelaAstVisitor" />
+	  <touch file=".stamp-xmlvisitorgen" />
+	</target>
+
+	<target name="-check-astgen" depends="init">
+	  <uptodate property="astgen.notRequired" 
+		    srcfile="src/xml/promela-ast.dtd"
+		    targetfile=".stamp-astgen" />
+	</target>
+	<target name="astgen" depends="init, -check-astgen" unless="astgen.notRequired"
+		description="Generates AST nodes">
+	  <property name="astnodes.dir" value="src/Ast/Nodes" />
+	  <mkdir dir="${astnodes.dir}" />
+	  <ast-node-generator dtd="src/xml/promela-ast.dtd" destdir="${astnodes.dir}" />
+	  <touch file=".stamp-astgen" />
+	</target>
+
+	<target name="compile" depends="init, promela-parser, xmlvisitorgen, astgen" 
+		description="Compiles NIPS PROMELA compiler">
+	  <javac srcdir="src" destdir="${build}" deprecation="on" classpathref="classpath.all.compile" />
+	  <copy todir="build">
+	    <fileset dir="src">
+	      <include name="**/*.dat" />
+	      <include name="**/*.xsl" />
+	      <include name="**/*.dtd" />
+	      <include name="**/*.properties" />
+	    </fileset>
+	  </copy>
+	</target>
+
+	<target name="jar" depends="compile" description="">
+	  <jar destfile="lib/nips-promela-compiler.jar">
+	    <fileset dir="${build}"> 
+	      <include name="**/*.class" />
+	      <include name="**/*.dat" />
+	      <include name="**/*.dtd" />
+	      <include name="**/*.xsl" />
+	    </fileset>
+
+	    <manifest>
+	      <attribute name="Built-By" value="${user.name}"/>
+	      <attribute name="Main-Class" value="Start"/>
+	      <attribute name="Class-Path" value="jdom.jar"/>
+	      <section name="common">
+		<attribute name="Implementation-Title" value="NIPS PROMELA compiler"/>
+		<attribute name="Implementation-Version" value="${version} (${TODAY})"/> 
+		<attribute name="Implementation-Vendor" value="NIPS Team"/>
+	      </section>
+	    </manifest>
+	  </jar>
+	</target>
+
+	<target name="dist" depends="jar" description="Creates a binary distribution tarball">
+	   <tar tarfile="${nips_c.archive}.tar.bz2" compression="bzip2">
+	     <tarfileset dir="." prefix="${nips_c.archive}/">
+	       <include name="README" />
+	       <include name="ChangeLog" />
+	     </tarfileset>
+	     <tarfileset dir="." prefix="${nips_c.archive}/" mode="755">
+	       <include name="DEMO" />
+	       <include name="xml-serializer" />
+	       <include name="StatSem" />
+	       <include name="CodeGen" />
+	     </tarfileset>
+	     <tarfileset dir="lib" prefix="${nips_c.archive}/lib">
+	       <include name="nips-promela-compiler.jar" />
+	       <include name="jdom.jar" />
+	     </tarfileset>
+	     <tarfileset dir="examples" prefix="${nips_c.archive}/examples">
+	       <include name="**/*.pr" />
+	     </tarfileset>
+	     <tarfileset dir="examples" prefix="${nips_c.archive}/examples" mode="755">
+	       <include name="compile.sh" />
+	       <include name="clean.sh" />
+	     </tarfileset>
+	   </tar>
+	</target>
+
+	<target name="source-dist">
+	  <delete includeemptydirs="true" dir="${nips_c.archive}" />
+	  <cvs cvsRoot=":pserver:atlas.informatik.rwth-aachen.de:/schuermans"
+	       package="nips_c"
+	       dest="." />
+	  <tar tarfile="${nips_c.archive}-source.tar.bz2" compression="bzip2">
+	     <tarfileset dir="nips_c" prefix="${nips_c.archive}-source" />
+	     <tarfileset dir="nips_c" prefix="${nips_c.archive}-source" mode="755">
+	       <include name="DEMO" />
+	       <include name="lexer" />
+	       <include name="xml-serializer" />
+	       <include name="display-parser" />
+	       <include name="display-xml" />
+	       <include name="StatSem" />
+	       <include name="CodeGen" />
+	     </tarfileset>
+	  </tar>
+	  <delete includeemptydirs="true" dir="nips_c" />
+	</target>
+
+	<target name="clean" description="">
+	  <delete includeemptydirs="true" dir="${build}" />
+	  <delete file="lib/nips-promela-compiler.jar" />
+	  <delete file="src/xml/visitor/PromelaAstVisitor.java" />
+	  <delete file="${nips_c.archive}.tar.bz2" />
+	  <delete file="${nips_c.archive}-source.tar.bz2" />
+	  <delete>
+	    <fileset dir="." includes=".stamp-*" />
+	    <fileset dir="src/Ast/Nodes">
+	      <include name="*.java" />
+	    </fileset>
+	  </delete>
+	</target>
+
+	<target name="distclean" depends="clean" description="">
+	  <delete includeemptydirs="true" dir="src/parser/promela" />
+	</target>
+
+</project>
