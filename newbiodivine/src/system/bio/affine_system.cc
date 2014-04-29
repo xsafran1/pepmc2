@@ -698,7 +698,7 @@ real_t affine_system_t::value(size_t *_where, size_t _var)
 			
 			underSum *= model.getSumForVarByIndex(_var, s).GetRamps().at(r).value(thres);
 		}
-		/*
+		
 		//adding enumerated steps for actual summember 's' of equation for variable '_var'
 		for(size_t r = 0; r < model.getSumForVarByIndex(_var, s).GetSteps().size(); r++) {
 			
@@ -706,7 +706,7 @@ real_t affine_system_t::value(size_t *_where, size_t _var)
 			real_t thres = model.getThresholdForVarByIndex( stepVarIndex, _where[ stepVarIndex ] );
 			
 			underSum *= model.getSumForVarByIndex(_var, s).GetSteps().at(r).value(thres);
-		}*/
+		}
 		
 		//adding enumerated summember 's' to sum
 		sum += underSum;
