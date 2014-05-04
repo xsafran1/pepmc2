@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 template <typename T>
 class Summember
@@ -11,7 +12,7 @@ public:
 	struct ramp
 	{
 		// dim is index to model.var_names but incremented by 1. Proper using is model.getVariable(dim -1)
-		std::size_t dim;
+		std::size_t dim;		//Warning: index of var_name from Model.h but indexing from 1 (not 0)
 		value_type min;
 		value_type max;
 		value_type min_value;
@@ -45,73 +46,18 @@ public:
 
 		friend std::ostream& operator<<(std::ostream& out, const ramp& r) {
 		    if(r.negative)
-                out << "R(-)(" << r.dim << "," << r.min << "," << r.max << "," << r.min_value << "," << r.max_value << ")";
+                out << "R(-)("; 
             else
-                out << "R(+)(" << r.dim << "," << r.min << "," << r.max << "," << r.min_value << "," << r.max_value << ")";
+                out << "R(+)(";
+            out << r.dim - 1 << "," << r.min << "," << r.max << "," << r.min_value << "," << r.max_value << ")";
             return out;
 		}
 	};
 
 private:
 
-	/*
-	struct sigmoid
-	{
-		std::size_t dim;
-		value_type k;
-		value_type theta;
-		value_type a;
-		value_type b;
-		std::size_t n;
-		bool positive;
-		bool isInverse;
-
-		friend std::ostream& operator<<(std::ostream& out, const sigmoid& s) {
-		    if(!s.positive)
-                out << "S(-)[" << s.n << "](" << s.dim << "," << s.k << "," << s.theta << "," << s.a << "," << s.b << ")";
-            else
-                out << "S(+)[" << s.n << "](" << s.dim << "," << s.k << "," << s.theta << "," << s.a << "," << s.b << ")";
-            return out;
-		}
-
-		std::vector<value_type> enumerateYPoints(std::vector<value_type> x)
-		{
-			std::vector<value_type> y;
-			value_type tempA = a;
-			value_type tempB = b;
-
-			if (isInverse) {
-				if (!positive) {
-					tempA = b;
-					tempB = a;
-				}
-
-				for (int i = 0; i < x.size(); i++) {
-					//y.push_back((1 / tempA) + ((1 / tempB) - (1 / tempA))*((1 + tanh(k*(x.at(i) - (theta + log(tempB / tempA) / (2 * k)))))*0.5));
-					y.push_back(1/(tempA + (tempB - tempA)*((1 + tanh(k*(x.at(i) - theta)))*0.5)));
-				}
-
-			}
-			else {
-				if (!positive) {
-					tempA = b;
-					tempB = a;
-				}
-
-				for (int i = 0; i < x.size(); i++) {
-					y.push_back(tempA + (tempB - tempA)*((1 + tanh(k*(x.at(i) - theta)))*0.5));
-				}
-			}
-			return y;
-		}
-
-	};
-
-	std::vector<int> sigmoids;
-	*/
-
 	struct step {
-	    std::size_t dim;
+	    std::size_t dim;		//Warning: index of var_name from Model.h but indexing from 1 (not 0)
 	    value_type theta;
 	    value_type a;
 	    value_type b;
@@ -121,7 +67,7 @@ private:
         step() {}
 		step(std::size_t dim, value_type theta, value_type a, value_type b, value_type acc, bool positive = true)
                     : dim(dim), theta(theta), a(a), b(b), accuracy(acc), positive(positive) {
-        	if( (positive && b > a) || (!positive && a > b) ) {
+        	if( (positive && a > b) || (!positive && a < b) ) {
         		value_type temp = a;
         		this.a = b;
         		this.b = temp;
@@ -143,11 +89,46 @@ private:
                 out << "H(-)(";
             else
                 out << "H(+)(";
-            out << s.dim << "," << s.theta << "," << s.a << "," << s.b << "," << s.accuracy << ")";
+            out << s.dim - 1 << "," << s.theta << "," << s.a << "," << s.b << "," << s.accuracy << ")";
             return out;
 		}
 	};
 
+	struct hill {
+	    std::size_t dim;		//Warning: index of var_name from Model.h but indexing from 1 (not 0)
+	    value_type theta;
+	    value_type n;
+	    value_type a;
+	    value_type b;
+	    bool positive;
+	    
+        hill() {}
+		hill(std::size_t dim, value_type theta, value_type n, value_type a, value_type b, bool positive = true)
+                    : dim(dim), theta(theta), n(n), a(a), b(b), positive(positive) {
+        	if( (positive && a > b) || (!positive && a < b) ) {
+        		value_type temp = a;
+        		this.a = b;
+        		this.b = temp;
+        	}
+        }
+        hill(const step& s) : dim(s.dim), theta(s.theta), n(s.n), a(s.a), b(s.b), positive(s.positive) {}
+
+
+		value_type value(value_type value) const
+		{
+			value_type result = a + (b - a)*(std::pow(1.0,n) / (std::pow(1.0,n) + std::pow(theta/value,n))); 
+			return result;
+		}
+
+		friend std::ostream& operator<<(std::ostream& out, const hill& s) {
+		    if(s.positive)
+                out << "Hill(-)(";
+            else
+                out << "Hill(+)(";
+            out << s.dim - 1 << "," << s.theta << "," << s.n << "," << s.a << "," << s.b << ")";
+            return out;
+		}
+	};
 
 public:
 	Summember()
@@ -188,6 +169,11 @@ public:
 	std::vector<step> GetSteps() const
 	{
 		return steps;
+	}
+	
+	std::vector<hill> GetHills() const
+	{
+		return hills;
 	}
 
 	// ADD
@@ -265,7 +251,21 @@ public:
 	void AddStep(step& new_step) {
 	    steps.push_back(new_step);
 	}
+	
+	void AddHill(std::size_t dim, value_type theta, value_type n, value_type a, value_type b, bool positive = 1) {
+		hill s;
+		s.dim = dim;
+	    s.theta = theta;
+	    s.n = n;
+	    s.a = a;
+	    s.b = b;
+	    s.positive = positive;
+	    hills.push_back(s);
+	}
 
+	void AddHill(hill& new_) {
+	    hills.push_back(new_);
+	}
 
 	std::size_t hasParam() const
 	{
@@ -296,6 +296,7 @@ private:
 	//Warning: sigmoids contains indexes to Model.sigmoids vector, BUT incremented by 1 (Proper using is Model.getSigmoids().at(sigmoids.at(i)-1))
 	std::vector<std::size_t> sigmoids;
 	std::vector<step> steps;
+	std::vector<hill> hills;
 
 };
 
@@ -328,19 +329,22 @@ template <class U>
 std::ostream& operator<<(std::ostream& out, const Summember<U>& sum) {
     out << sum.GetConstant();
     if(sum.hasParam()) {
-        out << "*" << sum.GetParam();
+        out << "*Param(" << sum.GetParam() - 1 << ")";
     }
     for(uint i = 0; i < sum.GetVars().size(); i++) {
-        out << "*" << sum.GetVars().at(i);
+        out << "*Var(" << sum.GetVars().at(i) - 1 << ")";
     }
     for(uint i = 0; i < sum.GetRamps().size(); i++) {
         out << "*" << sum.GetRamps().at(i);
     }
     for(uint i = 0; i < sum.GetSigmoids().size(); i++) {
-        out << "*" << sum.GetSigmoids().at(i);
+        out << "*Sigm(" << sum.GetSigmoids().at(i) - 1 << ")";
     }
     for(uint i = 0; i < sum.GetSteps().size(); i++) {
         out << "*" << sum.GetSteps().at(i);
+    }
+    for(uint i = 0; i < sum.GetHills().size(); i++) {
+        out << "*" << sum.GetHills().at(i);
     }
 
     return out;
@@ -408,6 +412,16 @@ const Summember<T> Summember<T>::operator*(/*const*/ Summember<T> & s2)
 	std::vector<step> steps2 = s2.GetSteps();
 	for (typename std::vector<step>::iterator it = steps2.begin(); it != steps2.end(); it++) {
 		s_final.AddStep(*it);
+	}
+	
+	std::vector<hill> hills1 = s1.GetHills();
+	for (typename std::vector<hill>::iterator it = hills1.begin(); it != hills1.end(); it++) {
+		s_final.AddHill(*it);
+	}
+
+	std::vector<hill> hills2 = s2.GetHills();
+	for (typename std::vector<hill>::iterator it = hills2.begin(); it != hills2.end(); it++) {
+		s_final.AddHill(*it);
 	}
 
 	return s_final;

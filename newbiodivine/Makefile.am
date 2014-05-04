@@ -1,7 +1,7 @@
 include $(top_srcdir)/Makefile.am.global
 
 EXTRA_DIST=README bin/README WHATS_NEW
-SUBDIRS=lib tool src support
+SUBDIRS=lib tool src support cli
 DIST_SUBDIRS=$(SUBDIRS)
 
 #if DONTBUILDGUI

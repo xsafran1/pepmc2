@@ -546,10 +546,10 @@ void usage()
 
   cout <<"Usage: [mpirun -np N] owcty [options] input_file"<<endl;
   cout <<"Options: "<<endl;
-  cout <<" -V,--version\t\tshow version"<<endl;
+  cout <<" -v,--version\t\tshow version"<<endl;
   cout <<" -h,--help\t\tshow this help"<<endl;
   cout <<" -H x,--htsize x\tset the size of hash table to ( x<33 ? 2^x : x )"<<endl;
-  cout <<" -v,--verbose\t\tprint some statistics"<<endl;
+  cout <<" -V,--verbose\t\tprint some statistics"<<endl;
   cout <<" -q,--quiet\t\tquite mode"<<endl;
   cout <<" -c, --statelist\tshow counterexample states"<<endl;
   cout <<" -C x,--compress x\tset state compression method"<<endl;
@@ -560,7 +560,6 @@ void usage()
   cout <<" -s,--simple\t\tperform simple reachability only"<<endl;
   cout <<" -L,--log\t\tproduce logfiles (log period is 1 second)"<<endl;
   cout <<" -X w\t\t\tsets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
-  cout <<" -P x, --params x\tsets parameters of model to given values from file x"<<endl;
   cout <<" -Y\t\t\treserved for GUI"<<endl;
   cout <<" -Z\t\t\treserved for GUI"<<endl;
 }
@@ -1061,134 +1060,6 @@ void process_ce_path_state(state_ref_t _ref, size_t depth)
   return;
 }
 
-// }}}
-
-/*
-void  trimOwcty(std::string& _l)
-{
-  if (!_l.empty())
-    {
-      _l.erase(_l.find_last_not_of(" \t\n")+1);
-      if (!_l.empty())
-        {
-          size_t p=_l.find_first_not_of(" \t\n");
-          if (p!=std::string::npos)
-            _l.erase(0,p);
-        }
-    }
-}
-
-// Splits a string according to a separator. The result is stored in a queue of strings.
-std::queue<std::string>  splitOwcty(std::string _separator, std::string _what)
-{
-  std::queue<std::string> retval;
-  while (!_what.empty())
-    {
-      size_t pos = _what.find(_separator);
-      std::string s;
-      if (pos==std::string::npos)
-        {
-          s=_what;
-          _what.clear();
-        }
-      else
-        {
-          s=_what.substr(0,pos-(_separator.size()-1));
-          _what.erase(0,pos+_separator.size());
-        }
-      trimOwcty(s);
-      retval.push(s);
-      //std::cout <<"split:"<<s<<" _what="<<_what<<std::endl;
-    }
-  return retval;
-}
-
-std::map<std::string,std::vector<double> > params;
-
-int parametrisation_initial(std::string fileName) {
-
-	bool dbg = true;
-	int count = 1;
-	
-	std::ifstream paramFile(fileName);
-	if(paramFile.is_open()) {
-	
-		std::string line;
-		while(std::getline(paramFile,line).good()) {
-		
-			std::queue<std::string> splited;
-			trimOwcty(line);
-			splited = splitOwcty(":",line);
-			
-			if(splited.size() != 2)
-				std::cerr << "Error: In parametrisation_initial: Bad format of line in file.\n";
-				
-			std::string name = splited.front();
-			splited.pop();
-			
-			if(dbg) std::cerr << "Hladame parameter " << name << std::endl;
-			
-			std::vector<double> values;
-			int semiCount = 0;
-			
-			if(splited.front().find(';') == std::string::npos) {
-				
-				splited = splitOwcty(",",splited.front());
-				
-				while(!splited.empty()) {
-					values.push_back((double)std::stod(splited.front()));
-					splited.pop();
-					semiCount++;
-				}
-			} else {
-				
-				splited = splitOwcty(";",splited.front());
-				
-				if(splited.size() != 2)
-					std::cerr << "Error: In parametrisation_initial: Bad format of line in file.\n";
-					
-				double part = std::stod(splited.back());
-				
-				splited = splitOwcty(",",splited.front());
-				
-				if(splited.size() != 2)
-					std::cerr << "Error: In parametrisation_initial: Bad format of line in file.\n";
-				
-				double firstValue = std::stod(splited.front());
-				double lastValue = std::stod(splited.back());
-				
-				for(double v = firstValue; v < lastValue; v += part) {
-					semiCount++;
-					values.push_back(v);
-				}
-				semiCount++;
-				values.push_back(lastValue);
-			}
-			
-			count *= semiCount;
-			params[name] = values;
-		}
-	} else {
-		std::cerr << "Error: In parametrisation_initial: Parametrisation file cannot be opened.\n";
-	}
-	return count;
-}
-
-std::string chose_parameter() {
-	std::map<std::string, std::vector<double> >::iterator mit;
-	for(mit = params.begin(); mit != params.end(); mit++) {
-		if(mit->second.size() > 1) {
-			return mit->first;
-		}
-	}
-	std::cerr << "Error: In chose_parameter: Cannot find any multi-value parameter.\n";
-	return "";
-}
-
-void decrease_parameters(std::string name) {
-	params.at(name).pop_back();
-}
-*/
 
 int main(int argc, char** argv) 
 {
@@ -1207,9 +1078,6 @@ int main(int argc, char** argv)
   bool trail = false;
   bool show_ce = false;  
   int compression=0;
-  
-//  bool parametrisation = false;
-//  string parametrisation_arg;
 
 
   ostringstream oss,oss1;
@@ -1219,7 +1087,7 @@ int main(int argc, char** argv)
     { "quiet",      no_argument, 0, 'q'},
     { "trail",      no_argument, 0, 't'},
     { "report",     no_argument, 0, 'r'},
-    { "verbose",    no_argument, 0, 'v'},
+    { "verbose",    no_argument, 0, 'V'},
     { "log",        no_argument, 0, 'L'},
     { "por",        no_argument, 0, 'p'},
     { "statelist",  no_argument, 0, 'c'},
@@ -1227,8 +1095,7 @@ int main(int argc, char** argv)
     { "comp",       required_argument, 0, 'C' },
     { "htsize",     required_argument, 0, 'H' },
     { "basename",   required_argument, 0, 'X' },
-    { "version",    no_argument, 0, 'V'},
-  //  { "params",		required_argument, 0, 'P'},
+    { "version",    no_argument, 0, 'v'},
     { NULL, 0, NULL, 0 }
   };
 
@@ -1237,9 +1104,9 @@ int main(int argc, char** argv)
       oss1 <<" -"<<(char)c;
       switch (c) {
       case 'h': usage();return 0; break;
-      case 'V': version();return 0; break;
+      case 'v': version();return 0; break;
       case 'H': htsize=atoi(optarg); break;
-      case 'v':
+      case 'V':
       case 'S': print_statistics = true; break;
       case 'c': show_ce = true; break;
       case 's': simple = true; break;
@@ -1250,10 +1117,6 @@ int main(int argc, char** argv)
       case 'r': produce_report=true; break;
       case 't': trail=true; break;
       case 'C': compression = atoi(optarg); break;
-//      case 'P': /*tu bude nastavena hodnota na true a neskor v kode uz po nacitani modelu sa spusti funkcia, ktora vykona parametrizaciu*/ 
-//      		parametrisation = true;
-//      		parametrisation_arg = optarg;
-//      		break;
       case '?': cerr <<"unknown switch -"<<(char)optopt<<endl;
       }
     }  
@@ -1269,18 +1132,6 @@ int main(int argc, char** argv)
       return 0;
     }
 
-
-/*
-    int number_of_parametrisations = 1;
-	if(parametrisation) {
-		cout << "Parametrisation argument: " << parametrisation_arg << endl;
-		number_of_parametrisations = parametrisation_initial(parametrisation_arg);//p_sys->parametrisation(parametrisation_arg);
-		cout << "Parametrisation count: " << number_of_parametrisations << endl;
-	}    
-
-while(number_of_parametrisations > 0) {
-	std::string chosen_parameter = chose_parameter();
-*/
   
   /* decisions about the type of an input */
   char * filename = argv[optind];
@@ -1356,26 +1207,6 @@ while(number_of_parametrisations > 0) {
     	return err.id; 
     }
     
-    
-   // p_sys->get_parameters(params);
-    
-    
-/*    
-	if(parametrisation) {
-		cout << "Parametrisation argument: " << parametrisation_arg << endl;
-		// TODO: tu volat funkciu, ktora zoberie ako argument parametrisation_arg (nazov + cesta k suboru), otvori zadany subor a zisti, ci je to 
-		//		 varianta s jednou hodnotou na parameter (cize iba nahradenie hodnoty parametru touto hodnotou), alebo s rozsahom hodnot pre parameter
-		//		 (moze byt niekolko variant). V tomto pripade bude musiet funkcia vratit nejaku hodnotu, ktora spusti novy cyklus, pre vsetky 
-		//		 kombinacie parametrov v tomto subore (treba tento cyklus dorobit na vhodnom mieste) a bude musiet domyselne ukladat do modelu 
-		//		 postupne zmenene hodnoty povodnych parametrov, aby bola kazda iteracia cyklu pocitana pre inu kombinaciu parametrov
-		number_of_parametrisations = p_sys->parametrisation(parametrisation_arg);
-		cout << "Parametrisation count: " << number_of_parametrisations << endl;
-	}    
-
-		finish = clock();
-		durationInSec = (double)(finish - start) / CLOCKS_PER_SEC;
-		cout << "\tDURATION: " << durationInSec << "\n";
-*/
 
   file_name = argv[optind];
   int position = file_name.find(input_file_ext,0);
@@ -1498,13 +1329,6 @@ while(number_of_parametrisations > 0) {
   delete_state(state);
   
   /* reachability */
-
-  
-/*
-//TODO: tu by pravdepodobne mohol zacinat ten novy cyklus kvoli parametrizacii
-while(number_of_parametrisations > 0) {
-*/
-
   
 
   if (distributed.network_id == 0 && print_statistics)
@@ -2338,21 +2162,8 @@ while(number_of_parametrisations > 0) {
 		  ce_out.close();
 		}
     }
- 
-/*
-p_sys->decrement_parametrisations_count(); 
-number_of_parametrisations--;    
-//TU NEKDE BY MAL ASI KONCIT TEN NOVY VSUNUTY CYKLUS KVOLI PARAMETRIZACII
-}
-*/
   
   delete p_sys;
-/*
-st.clean();
-decrease_parameters(chosen_parameter);  
-number_of_parametrisations--;
-} //DEMON end of my while for parametrisation
-*/
   distributed.finalize();
   return 0;
 }

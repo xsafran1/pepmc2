@@ -26,6 +26,8 @@
 
 %token <svalue> STEP
 
+%token <svalue> HILL
+
 %left '+' '-'
 %left '*'
 %nonassoc '='
@@ -399,6 +401,34 @@ ap:		NUMBER		{
                             eq.push(ent);
                         }
                     }
+	|	HILL		{
+						if(testing) std::cout << "hill\t" << d_scanner.matched() << std::endl;
+						if(run) {
+                            Entite<Parser::valueT> ent(storage);
+                            std::string matched = d_scanner.matched();
+                            size_t startPos = 0;
+                            size_t endPos = matched.find_first_of("(");
+                            std::string title = matched.substr(startPos,endPos);
+                            //std::cout << "\t" << title << " ";            //TODO: zmazat
+                            std::vector<std::string> params;
+
+                            for(int i = 0; i < 4; i++) {
+                                startPos = ++endPos;
+                                endPos = matched.find_first_of(",",startPos);
+                                params.push_back(matched.substr(startPos,endPos - startPos));
+                                //std::cout << params.back() << " ";        //TODO: zmazat
+                            }
+                            params.push_back(matched.substr(++endPos,matched.find_first_of(")",endPos) - 1 - endPos));
+                            //std::cout << params.back() << std::endl;      //TODO: zmazat
+
+                            if(title.compare(4,1,"p") == 0) {
+                                    ent.PutHillp(params.at(0),params.at(1),params.at(2),params.at(3),params.at(4));
+                            } else {
+                                    ent.PutHillm(params.at(0),params.at(1),params.at(2),params.at(3),params.at(4));
+                            }
+                            eq.push(ent);
+                        }
+					}
 
     |   '-' NUMBER	{
                         if(testing) std::cout << "c\t-" << d_scanner.matched() << std::endl;
@@ -530,6 +560,35 @@ ap:		NUMBER		{
                             eq.push(ent);
                         }
                     }
+	|	'-' HILL	{
+						if(testing) std::cout << "hill\t-" << d_scanner.matched() << std::endl;
+						if(run) {
+                            Entite<Parser::valueT> ent(storage);
+                            std::string matched = d_scanner.matched();
+                            size_t startPos = 0;
+                            size_t endPos = matched.find_first_of("(");
+                            std::string title = matched.substr(startPos,endPos);
+                            //std::cout << "\t" << title << " ";            //TODO: zmazat
+                            std::vector<std::string> params;
+
+                            for(int i = 0; i < 4; i++) {
+                                startPos = ++endPos;
+                                endPos = matched.find_first_of(",",startPos);
+                                params.push_back(matched.substr(startPos,endPos - startPos));
+                                //std::cout << params.back() << " ";        //TODO: zmazat
+                            }
+                            params.push_back(matched.substr(++endPos,matched.find_first_of(")",endPos) - 1 - endPos));
+                            //std::cout << params.back() << std::endl;      //TODO: zmazat
+
+                            if(title.compare(4,1,"p") == 0) {
+                                    ent.PutHillp(params.at(0),params.at(1),params.at(2),params.at(3),params.at(4));
+                            } else {
+                                    ent.PutHillm(params.at(0),params.at(1),params.at(2),params.at(3),params.at(4));
+                            }
+                            ent.negate();
+                            eq.push(ent);
+                        }
+					}
 ;
 
 expr:       summation       {

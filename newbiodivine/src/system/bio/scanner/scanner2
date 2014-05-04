@@ -36,6 +36,11 @@ CHAR_STRING     [a-zA-Z]+[_0-9a-zA-Z~{}]*
                     column_num += length();
 					return Parser::STEP;
 				}
+				
+[Hh]ill[mp]"("{CHAR_STRING}\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})\)	{
+                    column_num += length();
+					return Parser::HILL;
+				}
 
 ^(VARS:)		{
                     column_num += length();

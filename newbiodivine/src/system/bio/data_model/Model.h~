@@ -24,39 +24,7 @@ class Model
 	typedef T value_type;
 
 private:
-/*
-	struct ramp
-	{
-		std::size_t dim;
-		value_type min;
-		value_type max;
-		value_type min_value;
-		value_type max_value;
-		bool negative;
 
-		ramp(std::size_t dim, value_type min, value_type max, value_type minValue, value_type maxValue, bool negative = false)
-                    : dim(dim), min(min), max(max), min_value(minValue), max_value(maxValue), negative(negative) {}
-
-		value_type value(value_type value) const
-		{
-			value_type res = (value - min) / (max - min);
-			res = min_value + (res * (max_value - min_value));
-			if (res < 0)
-				res = 0;
-			else if (res > 1)
-				res = 1;
-			return negative ? 1 - res : res;
-		}
-
-		friend std::ostream& operator<<(std::ostream& out, const ramp& r) {
-			if (r.negative)
-				out << "R(-)(" << r.dim << "," << r.min << "," << r.max << "," << r.min_value << "," << r.max_value << ")";
-			else
-				out << "R(+)(" << r.dim << "," << r.min << "," << r.max << "," << r.min_value << "," << r.max_value << ")";
-			return out;
-		}
-	};
-*/
 	struct sigmoid
 	{
 		std::size_t dim;
@@ -70,9 +38,10 @@ private:
 
 		friend std::ostream& operator<<(std::ostream& out, const sigmoid& s) {
 			if (!s.positive)
-				out << "S(-)[" << s.n << "](" << s.dim << "," << s.k << "," << s.theta << "," << s.a << "," << s.b << ")";
+				out << "S(-)[";
 			else
-				out << "S(+)[" << s.n << "](" << s.dim << "," << s.k << "," << s.theta << "," << s.a << "," << s.b << ")";
+				out << "S(+)[";
+			out << s.n << "](" << s.dim << "," << s.k << "," << s.theta << "," << s.a << "," << s.b << ")";
 			return out;
 		}
 
@@ -81,29 +50,11 @@ private:
 			std::vector<value_type> y;
 			value_type tempA = a;
 			value_type tempB = b;
-
-			if (isInverse) {
-				if (!positive) {
-					tempA = b;
-					tempB = a;
-				}
-
-				for (size_t i = 0; i < x.size(); i++) {
-					//y.push_back((1 / tempA) + ((1 / tempB) - (1 / tempA))*((1 + tanh(k*(x.at(i) - (theta + log(tempB / tempA) / (2 * k)))))*0.5));
-					y.push_back(1 / (tempA + (tempB - tempA)*((1 + tanh(k*(x.at(i) - theta)))*0.5)));
-				}
-
+			
+			for (size_t i = 0; i < x.size(); i++) {
+				y.push_back(tempA + (tempB - tempA)*((1 + tanh(k*(x.at(i) - theta)))*0.5));
 			}
-			else {
-				if (!positive) {
-					tempA = b;
-					tempB = a;
-				}
-
-				for (size_t i = 0; i < x.size(); i++) {
-					y.push_back(tempA + (tempB - tempA)*((1 + tanh(k*(x.at(i) - theta)))*0.5));
-				}
-			}
+			
 			return y;
 		}
 
@@ -171,7 +122,7 @@ public:
 
 	const std::vector<sigmoid> getSigmoids() const;
 	
-	void set_parametrisation(std::map<std::string, std::vector<double> >& p);
+	//void set_parametrisation(std::map<std::string, std::vector<double> >& p);
 
 	void RunAbstraction();
 
@@ -389,10 +340,10 @@ void Model<T>::AddSigmoid(std::size_t segments, std::size_t dim, value_type k, v
 	s.dim = dim;
 	s.k = k;
 	s.theta = theta;
-	s.a = a;
-	s.b = b;
 	s.positive = positive;
 	s.isInverse = isInverse;
+	s.a = a;
+	s.b = b;
 	sigmoids.push_back(s);
 }
 
@@ -471,6 +422,7 @@ const std::vector<Summember<T> > Model<T>::getEquationForVariable(size_t varInde
 		}
 	}
 	//TODO: case of unexisting var or wrong index
+	return std::vector<Summember<T> >();
 }
 
 template <typename T>
@@ -629,7 +581,7 @@ void Model<T>::RunAbstraction()
 */
         }
 
-        new_ramps = generateNewRamps(thresholdsX, thresholdsY, i);
+        new_ramps = generateNewRamps(thresholdsX, thresholdsY, i+1);
 
         // For testing
         std::cout << "----------new ramps----------\n";

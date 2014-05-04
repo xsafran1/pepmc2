@@ -10,7 +10,9 @@ echo ''
 
 #Programs to build
 echo -n 'bin_PROGRAMS ='
-for PROGRAM in $*; do echo -n ' $(top_srcdir)/bin/$(BINPREFIX)'"$PROGRAM"; done
+for PROGRAM in $*; do 
+	echo -n ' $(top_srcdir)/bin/$(BINPREFIX)'"$PROGRAM"
+done
 echo ''
 
 ALL_HH_FILES=`echo *.hh`

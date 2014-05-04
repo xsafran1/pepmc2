@@ -80,6 +80,7 @@ AM_CONDITIONAL([FORCE_CVS_STYLE_COMPILATION],
 
 AC_CONFIG_FILES([
                 Makefile
+                cli/Makefile
                 lib/Makefile
 		src/Makefile
 		tool/Makefile

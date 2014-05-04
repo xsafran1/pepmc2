@@ -1,0 +1,11 @@
+#define a E2F1 > 8
+#define b E2F1 < 2
+#define c E2F1 >= 2
+
+#property FG (a)
+
+#property G (b)
+
+#property G (c)
+
+

@@ -3,6 +3,8 @@
 #include <string>
 #include <stdexcept>
 #include <cmath>
+#include <sstream>
+#include <fstream>
 #include "Summember.h"
 #include "Model.h"
 
@@ -40,6 +42,9 @@ public:
 
     void PutHp(std::string var, std::string theta, std::string a, std::string b, std::string accuracy);
     void PutHm(std::string var, std::string theta, std::string a, std::string b, std::string accuracy);
+    
+    void PutHillp(std::string var, std::string theta, std::string n, std::string a, std::string b);
+    void PutHillm(std::string var, std::string theta, std::string n, std::string a, std::string b);
 
 	///////
 
@@ -183,7 +188,7 @@ void Entite<T>::PutString(std::string str)
 	if (1 == run) {
 	    for(i = 0; i < model.getConstants().size(); i++) {
 	        if(str.compare(model.getConstant(i).first) == 0) {
-	            PutConst(i+1);
+	            PutConst(i);
 	            run = 0;
 	            break;
 	        }
@@ -201,9 +206,6 @@ void Entite<T>::PutString(std::string str)
 		}*/
 	}
 
-    //TODO: only for testing (TO DELETE LATER)
-    if(run)
-        PutVar(9999);
 }
 
 template <typename T>
@@ -281,10 +283,19 @@ void Entite<T>::PutRm(std::string var, std::string theta1, std::string theta2, s
 template <typename T>
 void Entite<T>::PutRpCoor(std::string var, std::string theta1, std::string theta2, std::string y1, std::string y2)
 {
+	T yy1 = getNumberFromString(y1);
+	T yy2 = getNumberFromString(y2);
+	
+	if(yy1 > yy2) {
+		T temp = yy1;
+		yy1 = yy2;
+		yy2 = temp;
+	}
+	
     Summember<T> new_summember;
     for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
-            new_summember.AddRamp(i+1,getNumberFromString(theta1),getNumberFromString(theta2),getNumberFromString(y1),getNumberFromString(y2),false);
+            new_summember.AddRamp(i+1,getNumberFromString(theta1),getNumberFromString(theta2),yy1,yy2,false);
             AddSummember(new_summember);
             return;
         }
@@ -296,10 +307,19 @@ void Entite<T>::PutRpCoor(std::string var, std::string theta1, std::string theta
 template <typename T>
 void Entite<T>::PutRmCoor(std::string var, std::string theta1, std::string theta2, std::string y1, std::string y2)
 {
+	T yy1 = getNumberFromString(y1);
+	T yy2 = getNumberFromString(y2);
+	
+	if(yy1 < yy2) {
+		T temp = yy1;
+		yy1 = yy2;
+		yy2 = temp;
+	}
+	
     Summember<T> new_summember;
     for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
-            new_summember.AddRamp(i+1,getNumberFromString(theta1),getNumberFromString(theta2),getNumberFromString(y1),getNumberFromString(y2),true);
+            new_summember.AddRamp(i+1,getNumberFromString(theta1),getNumberFromString(theta2),yy1,yy2,true);
             AddSummember(new_summember);
             return;
         }
@@ -311,11 +331,21 @@ void Entite<T>::PutRmCoor(std::string var, std::string theta1, std::string theta
 template <typename T>
 void Entite<T>::PutSp(std::string points, std::string var, std::string k, std::string theta, std::string a, std::string b)
 {
+    T kk = getNumberFromString(k);
+    T th = getNumberFromString(theta);
+    T aa = getNumberFromString(a);
+    T bb = getNumberFromString(b);
     Summember<T> new_summember;
     for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
+        
+        	if(aa > bb) {
+        		T temp = aa;
+        		aa = bb;
+        		bb = temp;
+        	}	
 
-            model.AddSigmoid((size_t)getNumberFromString(points),i+1,getNumberFromString(k),getNumberFromString(theta),getNumberFromString(a),getNumberFromString(b));
+            model.AddSigmoid((size_t)getNumberFromString(points),i+1,kk,th,aa,bb);
 			new_summember.AddSigmoid(model.GetSigmoidsSize());
 			AddSummember(new_summember);
             return;
@@ -328,10 +358,21 @@ void Entite<T>::PutSp(std::string points, std::string var, std::string k, std::s
 template <typename T>
 void Entite<T>::PutSm(std::string points, std::string var, std::string k, std::string theta, std::string a, std::string b)
 {
+    T kk = getNumberFromString(k);
+    T th = getNumberFromString(theta);
+    T aa = getNumberFromString(a);
+    T bb = getNumberFromString(b);
     Summember<T> new_summember;
     for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
-            model.AddSigmoid((size_t)getNumberFromString(points),i+1,getNumberFromString(k),getNumberFromString(theta),getNumberFromString(b),getNumberFromString(a));
+        
+        	if(aa < bb) {
+        		T temp = aa;
+        		aa = bb;
+        		bb = temp;
+        	}	        	
+        
+            model.AddSigmoid((size_t)getNumberFromString(points),i+1,kk,th,aa,bb,false);
 			new_summember.AddSigmoid(model.GetSigmoidsSize());
             AddSummember(new_summember);
             return;
@@ -345,18 +386,26 @@ template <typename T>
 void Entite<T>::PutSpInv(std::string points, std::string var, std::string k, std::string theta, std::string a, std::string b)
 {
     T kk = getNumberFromString(k);
+    T th = getNumberFromString(theta);
     T aa = getNumberFromString(a);
     T bb = getNumberFromString(b);
     Summember<T> new_summember;
     for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
+        
+        	if(aa > bb) {
+        		T temp = aa;
+        		aa = bb;
+        		bb = temp;
+        	}	        	        	
+        
             model.AddSigmoid((size_t)getNumberFromString(points),
                                      i+1,
                                      kk,
-                                     getNumberFromString(theta) + log(aa/bb)/(2*kk),
+                                     th + log(aa/bb)/(2*kk),
                                      1/aa,
-                                     1/bb
-                                     );
+                                     1/bb,
+                                     false);
 			new_summember.AddSigmoid(model.GetSigmoidsSize());
             AddSummember(new_summember);
             return;
@@ -370,15 +419,23 @@ template <typename T>
 void Entite<T>::PutSmInv(std::string points, std::string var, std::string k, std::string theta, std::string a, std::string b)
 {
     T kk = getNumberFromString(k);
-    T aa = getNumberFromString(b);          // Very important change: a = b
-    T bb = getNumberFromString(a);          // Very important change: b = a
+    T th = getNumberFromString(theta);
+    T aa = getNumberFromString(a);
+    T bb = getNumberFromString(b);
     Summember<T> new_summember;
     for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
+        
+        	if(aa < bb) {
+        		T temp = aa;
+        		aa = bb;
+        		bb = temp;
+        	}	        	        	        
+        
             model.AddSigmoid((size_t)getNumberFromString(points),
                                      i+1,
                                      kk,
-                                     getNumberFromString(theta) + log(aa/bb)/(2*kk),
+                                     th + log(aa/bb)/(2*kk),
                                      1/aa,
                                      1/bb
                                      );
@@ -398,6 +455,13 @@ void Entite<T>::PutHp(std::string var, std::string theta, std::string a, std::st
     T aa = getNumberFromString(a);
     T bb = getNumberFromString(b);
     T ac = getNumberFromString(accuracy);
+    
+    if(aa > bb) {
+    	T temp = aa;
+    	aa = bb;
+    	bb = temp;
+    }
+    
     Summember<T> new_summember;
     for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
@@ -415,6 +479,13 @@ void Entite<T>::PutHm(std::string var, std::string theta, std::string a, std::st
     T aa = getNumberFromString(a);
     T bb = getNumberFromString(b);
     T ac = getNumberFromString(accuracy);
+    
+    if(aa < bb) {
+    	T temp = aa;
+    	aa = bb;
+    	bb = temp;
+    }
+    
     Summember<T> new_summember;
     for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
@@ -423,6 +494,86 @@ void Entite<T>::PutHm(std::string var, std::string theta, std::string a, std::st
             return;
         }
     }
+}
+
+template <typename T>
+void Entite<T>::PutHillp(std::string var, std::string theta, std::string n, std::string a, std::string b) {
+	
+	T th = getNumberFromString(theta);
+    T nn = getNumberFromString(n);
+    T aa = getNumberFromString(a);
+    T bb = getNumberFromString(b);
+    
+    if(aa > bb) {
+    	T temp = aa;
+    	aa = bb;
+    	bb = temp;
+    }
+    
+    Summember<T> new_summember;
+    for(uint i = 0; i < model.getVariables().size(); i++) {
+        if(var.compare(model.getVariable(i)) == 0) {
+        	new_summember.AddHill(i + 1, th, nn, aa, bb, true);
+        	
+        	//only for testing
+        	std::stringstream ss;
+        	ss << "test_curve.Hill(" << i << "," << th << "," << nn << "," << aa << "," << bb << ").dat";
+
+            std::ofstream out(ss.str(),std::ofstream::out | std::ofstream::trunc);
+            if(out.is_open()) {
+
+		    	for(int t = 0; t < model.getThresholdsForVariable(i).size(); t++) {
+		    		T thres = model.getThresholdForVarByIndex(i, t);
+		    		out << thres << "\t" << new_summember.GetHills().back().value(thres) << "\n";
+		    	}
+		    }
+            out.close();
+            //end of testing
+        	
+            AddSummember(new_summember);
+            return;
+        }
+    }    
+}
+
+template <typename T>
+void Entite<T>::PutHillm(std::string var, std::string theta, std::string n, std::string a, std::string b) {
+	
+	T th = getNumberFromString(theta);
+    T nn = getNumberFromString(n);
+    T aa = getNumberFromString(a);
+    T bb = getNumberFromString(b);
+    
+    if(aa < bb) {
+    	T temp = aa;
+    	aa = bb;
+    	bb = temp;
+    }
+    
+    Summember<T> new_summember;
+    for(uint i = 0; i < model.getVariables().size(); i++) {
+        if(var.compare(model.getVariable(i)) == 0) {
+        	new_summember.AddHill(i + 1, th, nn, aa, bb, false);
+/*        	
+        	//only for testing
+        	std::stringstream ss;
+        	ss << "test_curve.Hill(" << i << "," << th << "," << nn << "," << aa << "," << bb << ").dat";
+
+            std::ofstream out(ss.str(),std::ofstream::out | std::ofstream::trunc);
+            if(out.is_open()) {
+
+		    	for(int t = 0; t < model.getThresholdsForVariable(i).size(); t++) {
+		    		T thres = model.getThresholdForVarByIndex(i, t);
+		    		out << thres << "\t" << new_summember.GetHills().back().value(thres) << "\n";
+		    	}
+		    }
+            out.close();
+            //end of testing
+*/        	
+            AddSummember(new_summember);
+            return;
+        }
+    }    
 }
 
 template <typename T>

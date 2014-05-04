@@ -17,6 +17,13 @@ void myVarRecord::setVar(divine::affine_explicit_system_t *_p,size_t _i)
       auxStr+="("+QString::number(_p->/*vars[_i].sums[j].k*/model.getSumForVarByIndex(_i, j).GetConstant())+")";
       //TODO: dalo by sa pridat ku konstante prinasobit aj hodnotu parametru ak nejaky je
       
+    	if (_p->model.getSumForVarByIndex(_i, j).hasParam()) {
+    		double fstValue = _p->model.getParamRange(_p->model.getSumForVarByIndex(_i,j).GetParam() - 1).first;
+    		double sndValue = _p->model.getParamRange(_p->model.getSumForVarByIndex(_i,j).GetParam() - 1).second;
+    		auxStr += "*";
+    		auxStr += QString::number((sndValue + fstValue)*0.5);
+    	}
+      
       for (/*size_t k=0; k<_p->get_dim(); k++*/ size_t k = 0; k < _p->model.getSumForVarByIndex(_i, j).GetVars().size(); k++ )
 		{
 		  //if (_p->vars[_i].sums[j].used_vars.get(k))

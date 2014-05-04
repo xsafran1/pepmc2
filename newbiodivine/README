@@ -11,7 +11,7 @@ For more informations see http://anna.fi.muni.cz/genesim/biodivine
 For compilation of this package follow the instructions:
 (1) Run 
     ./autogen
-    make CXXFLAGS='-std=c++11'
+    make
     For success in this step, you need Autoconf 2.61 and Automake 1.10.1 and gcc 4.7
     If you noticed some problems during ./configure, contact us
     (sybila@fi.muni.cz) or directly contact creator of this configuration

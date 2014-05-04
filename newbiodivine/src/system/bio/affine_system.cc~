@@ -661,34 +661,11 @@ real_t affine_system_t::value(size_t *_where, size_t _var)
 			underSum *= thres;
 		}
 	
-		//adding value of parameters
-		//if(params.empty()) {	
-		
 		//adding average value of actual summember's parameter, if any exists
 		if(model.getSumForVarByIndex(_var,s).hasParam()) {
 			std::pair<real_t,real_t> param = model.getParamRange(model.getSumForVarByIndex(_var,s).GetParam() - 1);
 			underSum *= (param.second + param.first) * 0.5;
 		}
-		
-		/*	
-		} else {
-		
-			//adding new value of parameter from parametrisation file, if that parameter exists
-			if(model.getSumForVarByIndex(_var,s).hasParam()) {
-			
-				size_t paramIndex = model.getSumForVarByIndex(_var,s).GetParam() - 1;
-				if(params.count(model.getParamName(paramIndex)) != 0) {
-				
-					underSum *= params.at(model.getParamName(paramIndex)).back();
-					if(dbg) std::cerr << "Using value from param file: " << params.at(model.getParamName(paramIndex)).back() << "\n";
-				} else {
-					//but if there wasnt right parameter in parametrisation file, we use classic value from the model
-					std::pair<real_t,real_t> param = model.getParamRange(model.getSumForVarByIndex(_var,s).GetParam() - 1);
-					underSum *= (param.second + param.first) * 0.5;
-					if(dbg) std::cerr << "Using value from classic model: " << (param.second + param.first) * 0.5 << "\n";
-				}
-			}
-		}*/
 		
 		//adding enumerated ramps for actual summember 's' of equation for variable '_var'
 		for(size_t r = 0; r < model.getSumForVarByIndex(_var, s).GetRamps().size(); r++) {
@@ -699,7 +676,7 @@ real_t affine_system_t::value(size_t *_where, size_t _var)
 			underSum *= model.getSumForVarByIndex(_var, s).GetRamps().at(r).value(thres);
 		}
 		
-		//adding enumerated steps for actual summember 's' of equation for variable '_var'
+		//adding enumerated step functions for actual summember 's' of equation for variable '_var'
 		for(size_t r = 0; r < model.getSumForVarByIndex(_var, s).GetSteps().size(); r++) {
 			
 			size_t stepVarIndex = model.getSumForVarByIndex(_var, s).GetSteps().at(r).dim -1;
@@ -707,6 +684,16 @@ real_t affine_system_t::value(size_t *_where, size_t _var)
 			
 			underSum *= model.getSumForVarByIndex(_var, s).GetSteps().at(r).value(thres);
 		}
+		
+		//adding enumerated hill functions for actual summember 's' of equation for variable '_var'
+		for(size_t r = 0; r < model.getSumForVarByIndex(_var, s).GetHills().size(); r++) {
+			
+			size_t hillVarIndex = model.getSumForVarByIndex(_var, s).GetHills().at(r).dim -1;
+			real_t thres = model.getThresholdForVarByIndex( hillVarIndex, _where[ hillVarIndex ] );
+			
+			underSum *= model.getSumForVarByIndex(_var, s).GetHills().at(r).value(thres);
+		}
+		
 		
 		//adding enumerated summember 's' to sum
 		sum += underSum;
@@ -1897,7 +1884,7 @@ slong_int_t affine_system_t::read(const char * const fn)
     }
 	
 	size_t start, end;
-	
+
 	start = modelline.find("process");
 	end = modelline.find("system",start);
 
