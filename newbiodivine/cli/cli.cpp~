@@ -19,9 +19,10 @@ using namespace std;
 #define PIPE_ERROR			6
 #define MEMORY_ERROR		7
 
-#define NO_ALG_TYPE		0
-#define OWCTY_TYPE		1
-#define DISTR_MAP_TYPE	2
+#define NO_ALG_TYPE				0
+#define OWCTY_TYPE				1
+#define DISTR_MAP_TYPE			2
+#define OWCTY_REVERSED_TYPE		3
 
 
 void version()
@@ -43,7 +44,8 @@ void cli_usage()
   
   cout <<"Algorithm:\n";
   cout <<"    owcty\n";
-  cout <<"    distr_map\n\n";
+  cout <<"    distr_map\n";
+  cout <<"    owcty_reversed\n\n";
   
   cout <<"Options: "<<endl;
   cout <<"  For owcty:\n";
@@ -52,6 +54,7 @@ void cli_usage()
   cout <<"      -H x,--htsize x    set the size of hash table to ( x<33 ? 2^x : x )"<<endl;
   cout <<"      -V,--verbose       print some statistics"<<endl;
   cout <<"      -q,--quiet         quite mode"<<endl;
+  cout <<"      -f, --fast         use faster but less accurate algorithm for abstraction" << endl;  
   cout <<"      -c, --statelist    show counterexample states"<<endl;
   cout <<"      -C x,--compress x  set state compression method"<<endl;
   cout <<"                         (0 = no compression, 1 = Huffman static compression)"<<endl;
@@ -66,18 +69,37 @@ void cli_usage()
   cout << endl;
   
   cout <<"  For distr_map:\n";
-  cout <<"      -v, --version     show distr_map version"<<endl;
-  cout <<"      -h, --help        show this help"<<endl;
-  cout <<"      -r, --report      produce report (file.distr_map.report)"<<endl;
-  cout <<"      -t, --trail       produce trail file (file.distr_map.trail)"<<endl;
-  cout <<"      -c, --statelist   show counterexample states"<<endl;
-  cout <<"      -H x, --htsize x  set the size of hash table to ( x<33 ? 2^x : x )"<<endl;
-  cout <<"      -S, --printstats  print some statistics"<<endl;
-  cout <<"      -q, --quiet       quiet mode (do not print anything - overrides all except -h and -v)"<<endl;
-  cout <<"      -L                perform logging"<<endl;
-  cout <<"      -X w              sets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
-  cout <<"      -Y                reserved for GUI"<<endl;
-  cout <<"      -Z                reserved for GUI"<<endl;  
+  cout <<"      -v, --version      show distr_map version"<<endl;
+  cout <<"      -h, --help         show this help"<<endl;
+  cout <<"      -r, --report       produce report (file.distr_map.report)"<<endl;
+  cout <<"      -t, --trail        produce trail file (file.distr_map.trail)"<<endl;
+  cout <<"      -c, --statelist    show counterexample states"<<endl;
+  cout <<"      -f, --fast         use faster but less accurate algorithm for abstraction" << endl;
+  cout <<"      -H x, --htsize x   set the size of hash table to ( x<33 ? 2^x : x )"<<endl;
+  cout <<"      -S, --printstats   print some statistics"<<endl;
+  cout <<"      -q, --quiet        quiet mode (do not print anything - overrides all except -h and -v)"<<endl;
+  cout <<"      -L                 perform logging"<<endl;
+  cout <<"      -X w               sets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
+  cout <<"      -Y                 reserved for GUI"<<endl;
+  cout <<"      -Z                 reserved for GUI"<<endl;  
+  cout << endl;
+  
+  cout <<"  For owcty_reversed:\n";
+  cout <<"      -v, --version      show version"<<endl;
+  cout <<"      -h, --help         show this help"<<endl;
+  cout <<"      -H x, --htsize x   set the size of hash table to ( x<33 ? 2^x : x )"<<endl;
+  cout <<"      -V, --verbose      print some statistics"<<endl;
+  cout <<"      -q, --quiet        quite mode"<<endl;
+  cout <<"      -c, --statelist    show counterexample states"<<endl;
+  cout <<"      -t, --trail        produce trail file"<<endl;
+  cout <<"      -f, --fast         use faster but less accurate algorithm for abstraction" << endl;
+  cout <<"      -r, --report       produce report file"<<endl;
+  cout <<"      -R, --remove       removes transitions while backpropagating (very slow, saves memory)" << endl;
+  cout <<"      -s, --simple       perform simple reachability only"<<endl;
+  cout <<"      -L, --log          produce logfiles (log period is 1 second)"<<endl;
+  cout <<"      -X w               sets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
+  cout <<"      -Y                 reserved for GUI"<<endl;
+  cout <<"      -Z                 reserved for GUI"<<endl;
   cout <<"-----------------------------------------------------------------"<<endl;
 }
 
@@ -90,6 +112,7 @@ void maintenance(char ** array) {
 */
 	delete[] array;
 }
+
 
 
 int main(int argc, char** argv) {
@@ -118,9 +141,14 @@ int main(int argc, char** argv) {
 		return BAD_INPUT_PARAMS;
 	}
 	
+	string callingPath = string(argv[0]).substr(0,string(argv[0]).size()-12);
+	if(dbg) cout << "calling path: " << callingPath << "\n";
+	
 	int pid1;
 	int fd[2];
 	vector<string> inputFiles;
+	string programWithPath = callingPath + "divine.combine";
+	if(dbg) cout << "Call combine: " << programWithPath << endl;
 	
 	if (pipe (fd) == -1) {
 		cerr << "\nError: Pipe wasn't created\n";
@@ -132,7 +160,7 @@ int main(int argc, char** argv) {
 			close(fd[0]);
 			dup2(fd[1],STDOUT_FILENO);
 			close(fd[1]);
-			execl("../bin/divine.combine","divine.combine",modelFile.c_str(),propertyFile.c_str());
+			execl(programWithPath.c_str(),"divine.combine",modelFile.c_str(),propertyFile.c_str());
 			_exit(EXEC_FAILED);
 			
 		case -1:
@@ -219,6 +247,9 @@ int main(int argc, char** argv) {
 		if(string(argv[1]).compare("distr_map") == 0) {
 			algorithm_type = DISTR_MAP_TYPE;
 		}
+		if(string(argv[1]).compare("owcty_reversed") == 0) {
+			algorithm_type = OWCTY_REVERSED_TYPE;
+		}
 	
 		if(algorithm_type == NO_ALG_TYPE) {
 			cerr << "\nError: No relevant algorithm was chosen\n";
@@ -226,28 +257,18 @@ int main(int argc, char** argv) {
 			return (NO_ALG_WAS_CHOSEN);
 		}
 		
+		programWithPath = callingPath + "divine." + newArgv[0];
+		if(dbg) cout << "Call algorithm: " << programWithPath << endl;
 		cout << "============ CALLING " << newArgv[0] << " ============\n";
+		cout.flush();
 
 		int pid;
 		switch(pid = fork()) {
 	
 			case 0:		// in the Children process
-				switch(algorithm_type) {
-				case OWCTY_TYPE:
-					execv("../bin/divine.owcty",newArgv);
-					maintenance(newArgv);
-					_exit(EXEC_FAILED);	
-				
-				case DISTR_MAP_TYPE:
-					execv("../bin/divine.distr_map",newArgv);
-					maintenance(newArgv);				
-					_exit(EXEC_FAILED);
-								
-				default:
-					cerr << "\nError: Some unspecified error was occured!\n";
-					maintenance(newArgv);				
-					exit(NO_ALG_WAS_CHOSEN);
-				}
+				execv(programWithPath.c_str(),newArgv);
+				maintenance(newArgv);
+				_exit(EXEC_FAILED);	
 			
 			case -1:	// fork error
 				cerr << "\nError: fork() for algorithm failed\n";
@@ -277,7 +298,7 @@ int main(int argc, char** argv) {
 
 
 	cout << "==================================================\n";
-	cout << "--------- NewBioDiVinE successfully done ---------\n";
+	cout << "--------- NewBioDiVinE successfully finish ---------\n";
 	cout << "==================================================\n\n";
 						
 	maintenance(newArgv);

@@ -7,7 +7,6 @@
 #ifndef DOXYGEN_PROCESSING
 #include "system/explicit_system.hh"
 #include "system/bio/affine_system.hh"
-#include "system/dve/dve_explicit_system.hh"
 #include "system/state.hh"
 #include "storage/explicit_storage.hh"
 #include "common/types.hh"

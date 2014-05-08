@@ -9,8 +9,8 @@ MYNAME=`echo $0|sed 's!.*/!!'`
 do_it()
 {
   if [ $DETERM == "yes" ]
-  then   echo $1 |@BINPREFIX@ltl2ba -g -O6 -t -p >>$2
-  else   echo $1 |@BINPREFIX@ltl2ba -g -O6 -t >>$2
+  then   echo $1 |`dirname $0`/@BINPREFIX@ltl2ba -g -O6 -t -p >>$2
+  else   echo $1 |`dirname $0`/@BINPREFIX@ltl2ba -g -O6 -t >>$2
   fi
 }
 
@@ -50,7 +50,7 @@ usage()
     echo " -d     determinize/semidetrminize property automaton"
 }
 
-EXTENSION=dve
+EXTENSION=bio
 DETERM=no
 SINGLEPROP=no
 OUT=no

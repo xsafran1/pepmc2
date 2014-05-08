@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string.h>
-#include "system/mcrl2_system.hh"
+//#include "system/mcrl2_system.hh"
 #include "distributed/distributed.hh"
 
 using namespace divine;
@@ -106,15 +106,15 @@ void distributed_t::finalize()
       }
     case NORMAL:
       {
-	network.finalize();
+		network.finalize();
 
-	mode = PRE_INIT;	
-	break;
+		mode = PRE_INIT;	
+		break;
       }
     case PRE_INIT:
       {
-	errvec << "Nothing to finalize." << thr(DISTRIBUTED_ERR_TYPE);
-	  break;
+		errvec << "Nothing to finalize." << thr(DISTRIBUTED_ERR_TYPE);
+		  break;
       }
     }
 }

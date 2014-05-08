@@ -32,7 +32,7 @@ CHAR_STRING     [a-zA-Z]+[_0-9a-zA-Z~{}]*
 					return Parser::SIGM;
 				}
 
-[Hh][mp]"("{CHAR_STRING}\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})\)	{
+[Hh][mp]"("{CHAR_STRING}\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})\,({REAL_NUMBER}|{CHAR_STRING})\)	{
                     column_num += length();
 					return Parser::STEP;
 				}

@@ -1,5 +1,4 @@
 #include "distributed/message.hh"
-#include "system/mcrl2_system.hh"
 #include <fstream>
 using namespace divine;
 using namespace std;
@@ -56,15 +55,6 @@ void message_t::append_state(const state_t state)
 {
  size_t len = state.size;
  char *sdata = state.ptr;
-
-#ifdef HAVE_MCRL2
- /* mcrl2 hack */
- if (!mcrl2_system_t::binstates) {
-  int l = 0;
-  sdata = mcrl2_system_t::ATwriteToSAFString(*((ATerm*) state.ptr), &l);
-  len = l;
- }
-#endif
 
  size_int_t old_end = end;
  potentially_realloc(len + sizeof(size_t));
@@ -145,16 +135,6 @@ void message_t::read_state(state_t & state)
 {
  size_t len = *((size_t *)(data + first));
  char *sdata = (char *) (data + first + sizeof(size_t));
-
-#ifdef HAVE_MCRL2
- ATerm at = 0;
- /* mcrl2 hack */
- if (!mcrl2_system_t::binstates) {
-  at = ::ATreadFromSAFString(sdata, len);
-  len = sizeof(ATerm);
-  sdata = (char *) &at;
- }
-#endif
 
  state = new_state(sdata, len);
  first += len + sizeof(size_t);

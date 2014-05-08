@@ -1,5 +1,4 @@
 #include "storage/explicit_storage.hh"
-#include "system/mcrl2_system.hh"
 #include <string>
 #include <sstream>
 
@@ -336,12 +335,6 @@ void explicit_storage_t::insert (state_t state, state_ref_t& state_reference)
   storage.ht_base[hresult].col_table[pos].ptr = cstate;
   storage.ht_base[hresult].col_table[pos].size = cstate_size;
 
-#ifdef HAVE_MCRL2
-  /* mcrl2 hack */
-  if (!mcrl2_system_t::binstates)
-    ATprotect((ATerm*) cstate);
-#endif
-
   state_reference.hres = hresult;
   state_reference.id = pos;
 
@@ -471,12 +464,6 @@ bool explicit_storage_t::is_stored_if_not_insert(state_t state,state_ref_t& stat
   mem_counting(cstate_size + appendix_size);
   storage.ht_base[hresult].col_table[pos].ptr = cstate;
   storage.ht_base[hresult].col_table[pos].size = cstate_size;
-
-#ifdef HAVE_MCRL2
-  /* mcrl2 hack */
-  if (!mcrl2_system_t::binstates)
-    ATprotect((ATerm*) cstate);
-#endif
 
   state_reference.hres = hresult;
   state_reference.id = pos;

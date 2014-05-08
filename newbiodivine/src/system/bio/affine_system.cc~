@@ -684,7 +684,7 @@ real_t affine_system_t::value(size_t *_where, size_t _var)
 			
 			underSum *= model.getSumForVarByIndex(_var, s).GetSteps().at(r).value(thres);
 		}
-		
+/*
 		//adding enumerated hill functions for actual summember 's' of equation for variable '_var'
 		for(size_t r = 0; r < model.getSumForVarByIndex(_var, s).GetHills().size(); r++) {
 			
@@ -693,7 +693,7 @@ real_t affine_system_t::value(size_t *_where, size_t _var)
 			
 			underSum *= model.getSumForVarByIndex(_var, s).GetHills().at(r).value(thres);
 		}
-		
+*/
 		
 		//adding enumerated summember 's' to sum
 		sum += underSum;
@@ -1833,8 +1833,15 @@ bool affine_system_t::is_comment(std::string _l)
   return false;
 }
 
+slong_int_t affine_system_t::read(const char * const fn, bool fast) {
+	useFastApproximation = fast;
+	return read(fn);
+}
+
+
 slong_int_t affine_system_t::read(const char * const fn)
 {
+	
   const bool dbg=false;
   if (dbg)
     std::cerr << "Reading file '" << fn << "'" << std::endl;
@@ -1861,7 +1868,7 @@ slong_int_t affine_system_t::read(const char * const fn)
 
     model = parser.returnStorage();
 
-    model.RunAbstraction();
+    model.RunAbstraction(useFastApproximation);
 
 	inited = 1;
 	update_initials();

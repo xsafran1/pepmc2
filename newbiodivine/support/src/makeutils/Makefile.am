@@ -8,6 +8,7 @@ CLEANFILES=$(noinst_SCRIPTS)
 #sources of scripts are not cimprised in a distribution, because these
 #scripts are not needed in a distribution
 
+
 $(top_srcdir)/bin/make_program_am.sh: make_program_am.sh
 	cp make_program_am.sh $(top_srcdir)/bin/
 

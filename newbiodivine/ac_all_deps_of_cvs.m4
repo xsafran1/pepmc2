@@ -11,8 +11,8 @@ AC_CHECK_FILE([support/src/makeutils/cvs_test],
  dnl Checks for programs.
  AC_PROG_YACC
  AC_PROG_LEX
- ACX_DOXYGEN
- ACX_ANT
+# ACX_DOXYGEN
+# ACX_ANT
  
  dnl if we are in copy of CVS, variable IS_CVS_COPY in makefiles
  dnl will expand to "yes"

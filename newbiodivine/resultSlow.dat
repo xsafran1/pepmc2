@@ -1,0 +1,538 @@
+=========================================
+------- Welcome to NewBioDiVinE ---------
+=========================================
+
+File for processing: ../examples/tcbb2010/tcbb1.bio.prop1.bio
+size of newArgv with terminating char: 4
+============ PROCESSING ../examples/tcbb2010/tcbb1.bio.prop1.bio ============
+new input argument of index 0:distr_map
+new input argument of index 1:-St
+new input argument of index 2:../examples/tcbb2010/tcbb1.bio.prop1.bio
+Reading bio source...
+pRB,E2F1
+k1:1
+y_pRB:0.005
+kp:0.05
+k2:1.6
+y_E2F1:0.1
+a:0.04
+------START-EQ------
+v_eq	pRB
+v	k1
+hill	Hillp(E2F1,0.5,1,0,1)
+hill	Hillm(pRB,0.5,1,1,0)
+v	y_pRB
+v	pRB
+-------END-EQ-------
+-----New Entite-----
+1*Hill(1)*Hill(0) + -0.005*Var(0)
+--------------------
+------START-EQ------
+v_eq	E2F1
+v	kp
+v	k2
+v	a
+v	a
+c	0.0625
+hill	Hillm(E2F1,4,2,1,0)
+hill	Hillp(E2F1,4,2,0,1)
+hill	Hillm(pRB,5,1,1,0)
+v	y_E2F1
+v	E2F1
+-------END-EQ-------
+-----New Entite-----
+0.00016*Hill(4)*Hill(3)*Hill(2) + 0.05 + -0.1*Var(1)
+--------------------
+pRB:0,1,2,6,7,8,10,3,4,5
+E2F1:0,1,2,4,6,8,10,12,15
+Init:pRB:0-1
+Init:E2F1:1-2
+For var of index 0 has been found 0 sigmoids
+For var of index 0 has been found 2 hill functions
+NUMBER OF SEGMENTS = 5
+xPoints.size() = 3500
+curves.size() = 2
+curve 0 size: 3500
+curve 1 size: 3500
+before optimalGlobalLinear...
+x.size() = 3500
+y.size() = 2
+segment m=1
+segment m=2
+segment m=3
+segment m=4
+x[0] =0
+x[1] =0.610174
+x[2] =2.1006
+x[3] =6.86196
+x[4] =16.0046
+x[5] =35
+after optimalGlobalLinear...
+duration = 1142.26 sec. Found = 0,0.610174,2.1006,6.86196,16.0046,35,
+New threses for var pRB: 0, 0.610174, 2.1006, 6.86196, 16.0046, 35, 
+All threses for var pRB: 0, 0.610174, 1, 2, 2.1006, 3, 4, 5, 6, 6.86196, 7, 8, 10, 16.0046, 35, 
+----------new hills ramps----------
+----new hill----
+R(-)(0,0,0.610174,1,0.45038)
+R(-)(0,0.610174,2.1006,0.45038,0.192263)
+R(-)(0,2.1006,6.86196,0.192263,0.0679167)
+R(-)(0,6.86196,16.0046,0.0679167,0.0302946)
+R(-)(0,16.0046,35,0.0302946,0.0140845)
+----new hill----
+R(-)(0,0,0.610174,1,0.891238)
+R(-)(0,0.610174,2.1006,0.891238,0.704166)
+R(-)(0,2.1006,6.86196,0.704166,0.421515)
+R(-)(0,6.86196,16.0046,0.421515,0.238043)
+R(-)(0,16.0046,35,0.238043,0.125)
+------end of new hills ramps-------
+in EQ 0
+in Summember:0
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 0 RAMPAMI
+pocet new summs:5
+pocty summs:2,1,6
+USPESNE NAHRADENE
+in hill function 0
+in Summember:0
+in hill function 0
+in Summember:1
+in hill function 0
+in Summember:2
+in hill function 0
+in Summember:3
+in hill function 0
+in Summember:4
+in EQ 1
+in Summember:0
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:3,2,7
+USPESNE NAHRADENE
+in hill function 0
+in hill function 1
+in Summember:0
+in hill function 0
+in hill function 1
+in Summember:1
+in hill function 0
+in hill function 1
+in Summember:2
+in hill function 0
+in hill function 1
+in Summember:3
+in hill function 0
+in hill function 1
+in Summember:4
+in Summember:5
+For var of index 1 has been found 0 sigmoids
+For var of index 1 has been found 3 hill functions
+NUMBER OF SEGMENTS = 5
+xPoints.size() = 1800
+curves.size() = 3
+curve 0 size: 1800
+curve 1 size: 1800
+curve 2 size: 1800
+before optimalGlobalLinear...
+x.size() = 1800
+y.size() = 3
+segment m=1
+segment m=2
+segment m=3
+segment m=4
+x[0] =0
+x[1] =0.520289
+x[2] =1.61089
+x[3] =5.26292
+x[4] =9.45525
+x[5] =18
+after optimalGlobalLinear...
+duration = 211.836 sec. Found = 0,0.520289,1.61089,5.26292,9.45525,18,
+New threses for var E2F1: 0, 0.520289, 1.61089, 5.26292, 9.45525, 18, 
+All threses for var E2F1: 0, 0.520289, 1, 1.61089, 2, 4, 5.26292, 6, 8, 9.45525, 10, 12, 15, 18, 
+----------new hills ramps----------
+----new hill----
+R(+)(1,0,0.520289,0,0.509943)
+R(+)(1,0.520289,1.61089,0.509943,0.763134)
+R(+)(1,1.61089,5.26292,0.763134,0.913238)
+R(+)(1,5.26292,9.45525,0.913238,0.949775)
+R(+)(1,9.45525,18,0.949775,0.972973)
+----new hill----
+R(-)(1,0,0.520289,1,0.983363)
+R(-)(1,0.520289,1.61089,0.983363,0.860447)
+R(-)(1,1.61089,5.26292,0.860447,0.366146)
+R(-)(1,5.26292,9.45525,0.366146,0.1518)
+R(-)(1,9.45525,18,0.1518,0.0470588)
+----new hill----
+R(+)(1,0,0.520289,0,0.0166373)
+R(+)(1,0.520289,1.61089,0.0166373,0.139553)
+R(+)(1,1.61089,5.26292,0.139553,0.633854)
+R(+)(1,5.26292,9.45525,0.633854,0.8482)
+R(+)(1,9.45525,18,0.8482,0.952941)
+------end of new hills ramps-------
+in EQ 0
+in Summember:0
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 0 RAMPAMI
+pocet new summs:5
+pocty summs:6,5,10
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 0 RAMPAMI
+pocet new summs:5
+pocty summs:10,9,14
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 0 RAMPAMI
+pocet new summs:5
+pocty summs:14,13,18
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 0 RAMPAMI
+pocet new summs:5
+pocty summs:18,17,22
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 0 RAMPAMI
+pocet new summs:5
+pocty summs:22,21,26
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in EQ 1
+in Summember:0
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 2 RAMPAMI
+pocet new summs:5
+pocty summs:7,6,11
+USPESNE NAHRADENE
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:11,10,15
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:15,14,19
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:19,18,23
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:23,22,27
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:27,26,31
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 2 RAMPAMI
+pocet new summs:5
+pocty summs:31,30,35
+USPESNE NAHRADENE
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:35,34,39
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:39,38,43
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:43,42,47
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:47,46,51
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:51,50,55
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 2 RAMPAMI
+pocet new summs:5
+pocty summs:55,54,59
+USPESNE NAHRADENE
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:59,58,63
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:63,62,67
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:67,66,71
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:71,70,75
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:75,74,79
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 2 RAMPAMI
+pocet new summs:5
+pocty summs:79,78,83
+USPESNE NAHRADENE
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:83,82,87
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:87,86,91
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:91,90,95
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:95,94,99
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:99,98,103
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 2 RAMPAMI
+pocet new summs:5
+pocty summs:103,102,107
+USPESNE NAHRADENE
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:107,106,111
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:111,110,115
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:115,114,119
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:119,118,123
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in hill function 0
+TERAZ TREBA NAHRADIT HILLOVU FUNKCIU 1 RAMPAMI
+pocet new summs:5
+pocty summs:123,122,127
+USPESNE NAHRADENE
+in Summember:0
+in Summember:1
+in Summember:2
+in Summember:3
+in Summember:4
+in Summember:5
+Parsing token: ==process LTL_property {state q1, q2;init q1;accept q2;transq1 -> q2 { guard not E2F1 > 8; },q1 -> q1 {},q2 -> q2 { guard not E2F1 > 8; },q2 -> q1 {};}==
+state q1, q2
+init q1
+accept q2
+prop trans:q1->q2
+ - 1>=8	[not E2F1 > 8]
+prop trans:q1->q1
+ + true
+prop trans:q2->q2
+ - 1>=8	[not E2F1 > 8]
+prop trans:q2->q1
+ + true
+Parsing token: ==system async property LTL_property;==
+ 0: Computation init:  1355.12 s
+0: iteration nr. 1: shrinkA.size: 0
+======================
+Accepting cycle found!
+======================
+ 0: state size:		24
+ 0: appendix size:	56
+ 0: states generated:	22
+ 0: hashtable size:	65536
+ 0: get_succs called:	12
+ 0: trans. relaxed:	52
+ 0: all memory used:	96.0156 MB
+ 0: Computation done:	1568.34 s
+ 0: --------------------
+ 0: Accepting cycle:	YES
+ 0: Number of iterations:	1
+============ CALLING distr_map ============
+============ distr_map DONE ============
+
+==================================================
+--------- NewBioDiVinE successfully done ---------
+==================================================
+

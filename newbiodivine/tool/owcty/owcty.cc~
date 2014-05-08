@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <queue>
+#include <stack>
 #include <time.h>
 #include "divine.h"
 
@@ -52,16 +53,6 @@ typedef struct appendix_t
 };
 
 
-/*bool inS; //in_S
-net_state_ref_t parent; //parent -- musi byt doplnen o nid!!!
-   int predecessor;//2 uses -1st holds number of state's predecessor   //p
-                   //-finding if graph contains cylce or not
-                  //-2nd use for reconstructing cycle and path -depth
-
-state_ref_t parent_r; // --> pocitat pomoci iteration
-list<state_ref_t>::iterator iterL;//slouzi k uchovani pozice v L*/
-
-
 const int TAG_SEND_STATE = DIVINE_TAG_USER +0;
 const int TAG_SEND_RESET = DIVINE_TAG_USER +1;
 const int TAG_SEND_REACH = DIVINE_TAG_USER +2;
@@ -81,14 +72,6 @@ const int TAG_PATH_RECONSTRUCTED=DIVINE_TAG_USER+15;
 const int TAG_PATH_RECONSTRUCTION=DIVINE_TAG_USER+16;
 const int TAG_TRY_TO_FIND_CANDIDATE=DIVINE_TAG_USER+17;
 
-/*const int TAG_CE_STATE   = DIVINE_TAG_USER +4;
-const int TAG_CE_SEND_STATE = DIVINE_TAG_USER +5;
-const int TAG_CE_STATE_WINNER = DIVINE_TAG_USER +6;
-const int TAG_CE_SEND_REACH = DIVINE_TAG_USER +7;
-const int TAG_CE_STATE_FOUND = DIVINE_TAG_USER +8;
-const int TAG_CE_COLLECTING = DIVINE_TAG_USER +9;
-const int TAG_CE_REQUEST = DIVINE_TAG_USER +10;*/
-
 const char * input_file_ext = 0;
 
 
@@ -104,14 +87,12 @@ timeinfo_t timer;
 vminfo_t vm;
 logger_t logger;
 bool simple = false;
-bool por_enabled = false;
 
 message_t message;
 message_t received_message;
 
 appendix_t appendix;
 
-stack<state_ref_t> dfs_stack; //to mimic (local) DFS when por_enabled=true
 queue<state_ref_t> waiting_queue; //used for generation of state space reduced by p.o.r. too
 queue<state_ref_t> q_queue;
 queue<state_ref_t> L_queue;
@@ -138,7 +119,6 @@ state_t *cycle_state, *path_state;
 
 enabled_trans_container_t *all_enabled_trans; 
 
-por_t por;
 
 path_t ce;
 
@@ -555,40 +535,17 @@ void usage()
   cout <<" -C x,--compress x\tset state compression method"<<endl;
   cout <<"\t\t\t(0 = no compression, 1 = Huffman static compression)"<<endl;
   cout <<" -t,--trail\t\tproduce trail file"<<endl;
-  cout <<" -p,--por\t\tenable partial order reduction"<<endl;
+  cout <<" -f, --fast\t\tuse faster but less accurate algorithm for abstraction" << endl;
   cout <<" -r,--report\t\tproduce report file"<<endl;
   cout <<" -s,--simple\t\tperform simple reachability only"<<endl;
   cout <<" -L,--log\t\tproduce logfiles (log period is 1 second)"<<endl;
   cout <<" -X w\t\t\tsets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
-  cout <<" -P x, --params x\tsets parameters of model to given values from file x"<<endl;
   cout <<" -Y\t\t\treserved for GUI"<<endl;
   cout <<" -Z\t\t\treserved for GUI"<<endl;
 }
 
 void generate_successors(state_t state, state_ref_t ref, enabled_trans_container_t *enb, succ_container_t *succs_cont)
 {
-  if (por_enabled)
-    {
-      succs_cont->clear();
-      st.get_app_by_ref(ref, appendix);
-      p_sys->get_enabled_trans(state, *enb);
-      size_int_t i,j,k;
-      for (i=j=0; j<p_sys->get_process_count(); j++)
-	{
-	  if (appendix.ample_set->get_bit(j))
-	    {
-	      for (k=0; k<enb->get_count(j); k++)
-		{
-		  p_sys->get_enabled_trans_succ(state, (*enb)[i+k], succ_state);
-		  succs_cont->push_back(succ_state);
-		}
-	    }
-	  i+=enb->get_count(j);
-	}
-      if (succs_cont->size()==0) //a deadlock detected, it's necessary to add selfloop which enb "hides"
-	p_sys->get_succs(state,*succs_cont);
-    }
-  else
     p_sys->get_succs(state,*succs_cont);
 }
 
@@ -1079,6 +1036,8 @@ int main(int argc, char** argv)
   bool trail = false;
   bool show_ce = false;  
   int compression=0;
+  
+  bool fastApproximation = false;
 
 
   ostringstream oss,oss1;
@@ -1088,9 +1047,9 @@ int main(int argc, char** argv)
     { "quiet",      no_argument, 0, 'q'},
     { "trail",      no_argument, 0, 't'},
     { "report",     no_argument, 0, 'r'},
+    { "fast",		no_argument, 0, 'f'},
     { "verbose",    no_argument, 0, 'V'},
     { "log",        no_argument, 0, 'L'},
-    { "por",        no_argument, 0, 'p'},
     { "statelist",  no_argument, 0, 'c'},
     { "simple",     no_argument, 0, 's'},
     { "comp",       required_argument, 0, 'C' },
@@ -1100,7 +1059,7 @@ int main(int argc, char** argv)
     { NULL, 0, NULL, 0 }
   };
 
-  while ((c = getopt_long(argc, argv, "cpshqtrvLC:X:YZH:VS", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "cfshqtrvLC:X:YZH:VS", longopts, NULL)) != -1)
     {
       oss1 <<" -"<<(char)c;
       switch (c) {
@@ -1111,8 +1070,8 @@ int main(int argc, char** argv)
       case 'S': print_statistics = true; break;
       case 'c': show_ce = true; break;
       case 's': simple = true; break;
+      case 'f': fastApproximation = true; break;
       case 'q': quiet = true; break;
-      case 'p': por_enabled=true; break;
       case 'L': perform_logging = true; break;
       case 'X': base_name_is_set = true; set_base_name = optarg; break;
       case 'r': produce_report=true; break;
@@ -1146,27 +1105,6 @@ int main(int argc, char** argv)
      input_file_ext = ".bio";
      p_sys = new affine_explicit_system_t(gerr);
    }
-  else
-   {
-     if (distributed.network_id==NETWORK_ID_MANAGER && print_statistics)
-       {
-		 cout << "Reading DVE source..." << endl;
-       }
-     input_file_ext = ".dve";
-     p_sys = new dve_explicit_system_t(gerr);
-   }
-
-  if ((por_enabled)&&(!(p_sys->get_abilities().system_can_processes))) //disable p.o.r., since bymoc hasn't had supprot for p.o.r. yet
-    {
-      cout << "WARNING: Partial order reduction switched off, since support for p.o.r. hasn't been implemented for bytecode source yet." << endl;
-      por_enabled=false;
-    }
-
-//   if ((trail) && (!p_sys->get_abilities().system_can_transitions) && (distributed.network_id == 0))
-//     {
-//       cout << "Model of system can't handle transitions, trail won't be produced." << endl;
-//       trail = false;
-//     }
 
   ce.set_system(p_sys);
   
@@ -1182,7 +1120,7 @@ int main(int argc, char** argv)
     {
     	start = clock();
     
-		if ((file_opening=p_sys->read(argv[optind]))&&(distributed.network_id==NETWORK_ID_MANAGER))
+		if ((file_opening=p_sys->read(argv[optind],fastApproximation))&&(distributed.network_id==NETWORK_ID_MANAGER))
 			{
 			
 		finish = clock();
@@ -1338,317 +1276,74 @@ int main(int argc, char** argv)
 	  cout <<"Reachability & Reset ..."<<flush;
     }
 
-  if (por_enabled) //perform reachability + reset of reduced state space
-    {
-      por.init(p_sys);
-      bool can_be_ample[p_sys->get_process_count()];
-      bool ample_chosen;
-      all_enabled_trans = new enabled_trans_container_t(*p_sys);
-      enabled_trans_container_t **active_trans;
-      active_trans = new enabled_trans_container_t*[p_sys->get_process_count()];
-      for (std::size_t i=0; i<p_sys->get_process_count(); i++)
-	  active_trans[i] = new enabled_trans_container_t(*p_sys);
-      size_int_t index;
-      std::size_t best_ample_size, best_ample_proc_id;
-      int state_owner;
-      state_ref_t state_ref;
-      state_t succ_state;
-      appendix_t app;
-      bool ample_without_proviso_exists;
-      while (!distributed.synchronized(info))
+
+  while (!distributed.synchronized(info))
+	{
+	  if (!waiting_queue.empty())
 		{
-		  if (!waiting_queue.empty())
-			{
-			  state_ref = waiting_queue.front();
-			  waiting_queue.pop();
-			  dfs_stack.push(state_ref);
-			  while (!(dfs_stack.empty())) //continue in DFS exploration
+		  ref = waiting_queue.front();
+		  waiting_queue.pop();
+		  
+		  state = st.reconstruct(ref);
+		  succs_calls++;
+		  succs_cont.clear();
+		  p_sys->get_succs(state,succs_cont);
+
+		  for (i=succs_cont.begin(); i!=succs_cont.end(); i++)
+			{		
+			  trans++;
+			  state_t r = *i;	  
+			  if (distributed.partition_function(r)!=distributed.network_id)
 				{
-				  state_ref = dfs_stack.top();
-				  dfs_stack.pop();
-				  st.get_app_by_ref(state_ref, appendix);
-				  if (appendix.ample_set==0) //state hasn't been visited yet => explore it
+				  net_state_ref_t nref;
+				  nref.state_ref = ref;
+				  nref.network_id = distributed.network_id;
+				  transcross++;
+				  message.rewind();
+				  message.append_state(r);
+				  message.append_data((byte_t *)&nref,sizeof(net_state_ref_t));
+				  distributed.network.send_message(message,
+								   distributed.partition_function(r),
+								   TAG_SEND_STATE);
+				}
+			  else
+				{
+				  state_ref_t r_ref;
+				  if (!st.is_stored(r,r_ref))
 					{
-					  appendix.ample_set = new bit_string_t(p_sys->get_process_count()); //state is already explored
-					  appendix.ample_set->clear();
-					  appendix.iteration=1; //to mark that the state is on the stack
-					  st.set_app_by_ref(state_ref, appendix);
-					  ample_chosen=false;
-					  index=0;
-					  state = st.reconstruct(state_ref);
-					  por.generate_composed_ample_sets(state, can_be_ample, active_trans, *all_enabled_trans);
-					  
-					  best_ample_size=MAX_ULONG_INT;
-					  ample_without_proviso_exists=false;
-					  for (size_t proc_id = 0; proc_id < p_sys->get_process_count(); proc_id++)
+					  st.insert(r,r_ref);
+					  appendix.in_S = p_sys->is_accepting(r);
+					  appendix.p = 0;
+					  appendix.ample_set = 0;
+					  appendix.iteration = 0;
+					  appendix.parent.state_ref = ref;
+					  appendix.parent.network_id = distributed.network_id;
+					  st.set_app_by_ref(r_ref,appendix);		
+					  if (appendix.in_S) //perform Reset together with first reachability
 						{
-						  if ((can_be_ample[proc_id])&&(active_trans[proc_id]->size()<all_enabled_trans->size()))
-							{
-							  ample_without_proviso_exists=true;
-							  succs_cont.clear();
-							  p_sys->get_enabled_trans_succs(state, succs_cont, *(active_trans[proc_id]));
-							  size_int_t j = 0;
-							  for (; j < succs_cont.size(); j++)
-								{
-								  succ_state=succs_cont[j];
-								  state_owner = distributed.partition_function(succ_state);
-								  if ((state_owner==distributed.network_id)&&(st.is_stored(succs_cont[j], ref)))
-									{
-									  st.get_app_by_ref(ref, app);
-									  if (app.max_pred_seed==appendix.max_pred_seed) //possible global cycle may be closed => disable this candidate
-									  j=succs_cont.size()+1;
-									}
-								}
-							  for (size_int_t k=0; k<succs_cont.size(); k++)
-							delete_state(succs_cont[k]);
-							  if (j==succs_cont.size()) //a candidate found
-								{
-								  if (best_ample_size>succs_cont.size()) //has it lower number of transitions?
-									{
-									  best_ample_size = succs_cont.size();
-									  best_ample_proc_id = proc_id;
-									}
-								}
-							}
+						  Ssize ++;
+						  q_queue.push(r_ref);
 						}
-					  if (best_ample_size!=MAX_ULONG_INT) //some proper ample set has been found
-						{ 
-						  
-						  //			  st.get_app_by_ref(state_ref, appendix); -- it isn't necessary
-						  for (size_int_t j=0; j<p_sys->get_process_count(); j++)
-							if (((!p_sys->get_with_property())||(j!=p_sys->get_property_gid()))&&(active_trans[best_ample_proc_id]->get_count(j)>0))
-							  appendix.ample_set->enable_bit(j);
-						  st.set_app_by_ref(state_ref, appendix);
-						  dfs_stack.push(state_ref); //current state added to the stack
-						  
-						  //generate successors and push them to the stack
-						  appendix_t app;			  
-						  succs_calls++;
-						  succs_cont.clear();
-						  p_sys->get_enabled_trans_succs(state, succs_cont, *(active_trans[best_ample_proc_id]));
-						  for (size_int_t j=0; j<succs_cont.size(); j++)
-							{
-							  succ_state = succs_cont[j];
-							  state_owner = distributed.partition_function(succ_state);
-							  trans++;
-							  if (state_owner==distributed.network_id)
-								{
-								  if (!st.is_stored(succ_state, ref))
-									{
-									  st.insert(succ_state, ref);
-									  app.in_S = p_sys->is_accepting(succ_state);
-									  app.p = 0;
-									  app.iteration = 0;
-									  app.parent.state_ref = state_ref;
-									  app.parent.network_id = distributed.network_id;
-									  app.ample_set=0;
-									  app.max_pred_seed=appendix.max_pred_seed;
-									  st.set_app_by_ref(ref,app);
-									  dfs_stack.push(ref);
-									  if (app.in_S) //perform Reset together with first reachability
-										{
-										  Ssize ++;
-										  q_queue.push(ref);
-										}
-									}
-								  else
-									{				      
-									  st.get_app_by_ref(ref,app);
-									  //app.ample_set=0 iff the state is stored, but not visited yet (it's in the stack as future branch to be explored or in the queue)
-									  if (((app.ample_set==0)&&(app.max_pred_seed==NET_STATE_REF_NULL))|| //really first propagation of max_pred_seed
-									  (app.max_pred_seed<appendix.max_pred_seed)) //successfull propagation
-										{
-										  app.max_pred_seed=appendix.max_pred_seed;
-										  st.set_app_by_ref(ref,app);
-										  dfs_stack.push(ref);
-										}
-									}
-								}
-							  else //send to the owner
-								{
-								  net_state_ref_t nref;
-								  nref.state_ref = state_ref;
-								  nref.network_id = distributed.network_id;
-								  transcross++;
-								  message.rewind();
-								  message.append_state(succ_state);
-								  message.append_data((byte_t *)&nref,sizeof(net_state_ref_t));
-								  message.append_data((byte_t *)&(appendix.max_pred_seed),sizeof(net_state_ref_t));
-								  distributed.network.send_message(message,
-												   state_owner,
-												   TAG_SEND_POR_STATE);					      
-								}
-							  delete_state(succ_state);
-							}
-						  succs_cont.clear();
-						}
-					  else //full expansion has to be
-						{
-						  if (ample_without_proviso_exists)
-							expand_due_to_proviso++;
-						  full_expand_state(state);
-						}
-					  delete_state(state);
-					}
-				  else //the case when appendix.ample_set!=0
-					if (appendix.iteration==0) //reexplore state in order to update por_histories of its successors
-					  {
-						size_int_t ii,j,k=0;
-						while ((k<p_sys->get_process_count())&&((appendix.ample_set->get_bit(k))))
-						  k++;
-
-						if (k<p_sys->get_process_count()) //reexplore state only if it isn't fully expanded
-						  {
-							reexplored_states++;
-							succs_cont.clear();
-							st.get_app_by_ref(state_ref, appendix);
-							state = st.reconstruct(state_ref);
-							p_sys->get_enabled_trans(state, *all_enabled_trans);
-							bool must_full_expand=false;
-							for (ii=j=0; j<p_sys->get_process_count(); j++)
-							  {
-								if (appendix.ample_set->get_bit(j))
-								  {
-									for (k=0; ((k<all_enabled_trans->get_count(j))&&(!must_full_expand)); k++)
-									  {
-										p_sys->get_enabled_trans_succ(state, (*all_enabled_trans)[ii+k], succ_state);
-										if (distributed.partition_function(succ_state)==distributed.network_id)
-										  {
-											st.is_stored(succ_state, succ_ref);
-											st.get_app_by_ref(succ_ref, app);
-											if (app.max_pred_seed<appendix.max_pred_seed) //propagate higher value
-											  {
-												app.max_pred_seed=appendix.max_pred_seed;
-												st.set_app_by_ref(succ_ref, app);
-												waiting_queue.push(succ_ref);
-											  }
-											else if (app.max_pred_seed==appendix.max_pred_seed) //a global cycle may be closed => fully expand this state
-												  must_full_expand=true;
-											delete_state(succ_state);
-										  }
-										else
-											  succs_cont.push_back(succ_state); //succs_cont contains nonlocal states
-
-									  }
-								  }
-								ii+=all_enabled_trans->get_count(j);
-							  }
-							if (must_full_expand)
-							  {
-								for (j=0; j<succs_cont.size(); j++)
-								  delete_state(succs_cont[j]);
-								expand_due_to_proviso++;
-								full_expand_state(state);
-							  }
-							else //propagate changes to successors on other workstations
-							  {
-								for (ii=0; (ii<succs_cont.size()); ii++)
-								  {
-									succ_state = succs_cont[ii];
-									net_state_ref_t nref;
-									nref.state_ref = state_ref;
-									nref.network_id = distributed.network_id;
-									message.rewind();
-									message.append_state(succ_state);
-									message.append_data((byte_t *)&nref,sizeof(net_state_ref_t));
-									message.append_data((byte_t *)&(appendix.max_pred_seed),sizeof(net_state_ref_t));
-									distributed.network.send_message(message,
-													 distributed.partition_function(succ_state),
-													 TAG_SEND_POR_STATE);
-									delete_state(succ_state);
-								  } //end of "for (ii=0; .."
-							  } //end of "else (!must_full_expand)"
-							delete_state(state);
-						  } //end of "if (k==p_sys->get_process_count())"
-					  }
-					else //the case when (appendix.ample_set!=0) and (appendix.iteration!=0)
-					{
-					  appendix.iteration=0; //we backtrack from the state, therefore remove the state from the stack
-					  st.set_app_by_ref(state_ref, appendix);
+					  waiting_queue.push(r_ref);
 					}
 				}
+			  delete_state(r);
 			}
-		  else //the case when waiting_queue.empty()==true
-			{
-			  distributed.network.flush_all_buffers();
-			  distributed.set_idle();
-			}
-		  distributed.process_messages();
+		  delete_state(state);
+		  succs_cont.clear();
 		}
-      for (std::size_t ii=0; ii<p_sys->get_process_count(); ii++)
-		delete active_trans[ii];
-
-      delete[] active_trans;
-    }
-  else //por_enabled=false, thus perform full reachability
-    {
-      while (!distributed.synchronized(info))
+	  else
 		{
-		  if (!waiting_queue.empty())
-			{
-			  ref = waiting_queue.front();
-			  waiting_queue.pop();
-			  
-			  state = st.reconstruct(ref);
-			  succs_calls++;
-			  succs_cont.clear();
-			  p_sys->get_succs(state,succs_cont);
-
-			  for (i=succs_cont.begin(); i!=succs_cont.end(); i++)
-				{		
-				  trans++;
-				  state_t r = *i;	  
-				  if (distributed.partition_function(r)!=distributed.network_id)
-					{
-					  net_state_ref_t nref;
-					  nref.state_ref = ref;
-					  nref.network_id = distributed.network_id;
-					  transcross++;
-					  message.rewind();
-					  message.append_state(r);
-					  message.append_data((byte_t *)&nref,sizeof(net_state_ref_t));
-					  distributed.network.send_message(message,
-									   distributed.partition_function(r),
-									   TAG_SEND_STATE);
-					}
-				  else
-					{
-					  state_ref_t r_ref;
-					  if (!st.is_stored(r,r_ref))
-						{
-						  st.insert(r,r_ref);
-						  appendix.in_S = p_sys->is_accepting(r);
-						  appendix.p = 0;
-						  appendix.ample_set = 0;
-						  appendix.iteration = 0;
-						  appendix.parent.state_ref = ref;
-						  appendix.parent.network_id = distributed.network_id;
-						  st.set_app_by_ref(r_ref,appendix);		
-						  if (appendix.in_S) //perform Reset together with first reachability
-							{
-							  Ssize ++;
-							  q_queue.push(r_ref);
-							}
-						  waiting_queue.push(r_ref);
-						}
-					}
-				  delete_state(r);
-				}
-			  delete_state(state);
-			  succs_cont.clear();
-			}
-		  else
-			{
-	#if defined(ORIG_FLUSH)
-			  distributed.network.flush_all_buffers();
-	#else
-			  distributed.network.flush_some_buffers();
-	#endif
-			  distributed.set_idle();
-			}
-		  distributed.process_messages();
+#if defined(ORIG_FLUSH)
+		  distributed.network.flush_all_buffers();
+#else
+		  distributed.network.flush_some_buffers();
+#endif
+		  distributed.set_idle();
 		}
-    }
+	  distributed.process_messages();
+	}
+
 
   if (distributed.network_id == 0 && print_statistics)
     {
@@ -2070,19 +1765,11 @@ int main(int argc, char** argv)
 		  cout <<"---------------------------------------"<<endl;
 		}     
     }
-  
-  if (por_enabled)
-    delete all_enabled_trans;
 
   if (!quiet && distributed.network_id==0)
     {
       cout <<"States:\t\t\t"<<info.data.allstored<<endl;
-      if (por_enabled)
-		{
-		  cout <<"fully expanded states:\t\t"<<info.data.allfullexpand<<endl;
-		  cout <<"Expansions forced by proviso:\t"<<info.data.allexpand_due_to_proviso<<endl;
-		  cout <<"reexplored states:\t\t"<<info.data.allreexplored_states<<endl;
-		}
+
       cout <<"transitions:\t\t"<<info.data.alltrans<<endl;
       cout <<"iterations:\t\t"<<iteration<<endl;
       state = p_sys->get_initial_state();

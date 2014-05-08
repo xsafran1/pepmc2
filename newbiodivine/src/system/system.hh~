@@ -107,6 +107,8 @@ class system_t
    *         system_t::ERR_FILE_NOT_OPEN.
    */
   virtual slong_int_t read(const char * const filename) = 0;
+  
+  virtual slong_int_t read(const char * const filename, bool forFastApproximation) = 0;
   //!Method for reading a model of a \sys from a source stored in a string
   /*!\param str = string to read
    * \return ... 0 iff no error occurs, non-zero value in a case of error
@@ -124,20 +126,6 @@ class system_t
   //! to the string
   virtual std::string to_string() = 0;
   /*@}*/
-  
-  
-  
-  
-  //!Method for reading parametrisation file. It returns number of runnings for all possible combinations of parameters
-  virtual int parametrisation(std::string fileName) { return 1; };
-  
-  //!Method that erases just one value for any multi-value parameter, 
-  //!so that in next iteration will be used another combination of values of parameters 
-  virtual void decrement_parametrisations_count() {};
-  
-  virtual void get_parameters(std::map<std::string, std::vector<double> >& p) {};
-  
-  
   
   
   //!Tells, whether current \sys is able to work with property process

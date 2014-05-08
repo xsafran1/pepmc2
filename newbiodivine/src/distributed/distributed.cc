@@ -1,7 +1,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <string.h>
-#include "system/mcrl2_system.hh"
 #include "distributed/distributed.hh"
 
 using namespace divine;
@@ -313,16 +312,6 @@ int distributed_t::partition_function(state_t &state)
   else {
     size_t len = state.size;
     unsigned char *data = reinterpret_cast<unsigned char*>(state.ptr);
-
-#ifdef HAVE_MCRL2
-    /* mcrl2 hack */
-    if (!mcrl2_system_t::binstates) {
-	int l = 0;
-	data = reinterpret_cast<unsigned char*>(
-		mcrl2_system_t::ATwriteToSAFString(*((ATerm*) state.ptr), &l));
-	len = l;
-    }
-#endif
 
     return (hasher.get_hash(data, len, NETWORK_HASH_SEED) % cluster_size);
   }

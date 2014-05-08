@@ -240,6 +240,8 @@ virtual  void add_sum(size_t _var, real_t _k, bitarray_t _usedvars);
   virtual slong_int_t read(std::istream & ins = std::cin);
 
   virtual slong_int_t read(const char * const filename);
+
+  virtual slong_int_t read(const char * const filename, bool fast);
   
   //Neuplne implementovane
   virtual slong_int_t from_string(const std::string str);
@@ -357,15 +359,10 @@ virtual  void add_sum(size_t _var, real_t _k, bitarray_t _usedvars);
   //! Sets and returns recommended zero precision using the RT_PRECISION constant
   real_t compute_treshold_precision();
 
-	/*
-	virtual int parametrisation(std::string fileName);
-	virtual void decrement_parametrisations_count(); 
-	virtual void get_parameters(std::map<std::string, std::vector<double> >& p);
-	*/
-
  protected:
-	std::map<std::string,std::vector<real_t> > params;
-
+ 
+ 	bool useFastApproximation = true;
+	
   real_t precision_thr;
   real_t zero_range;
   divine::affine_property_t *property_process;

@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iostream>
 #include <queue>
+#include <stack>
 #include "divine.h"
 
 using namespace std;
@@ -295,13 +296,14 @@ void usage()
 
   cout <<"Usage: [mpirun -np N] owcty_reversed [options] input_file"<<endl;
   cout <<"Options: "<<endl;
-  cout <<" -V,--version\t\tshow version"<<endl;
+  cout <<" -v,--version\t\tshow version"<<endl;
   cout <<" -h,--help\t\tshow this help"<<endl;
   cout <<" -H x,--htsize x\tset the size of hash table to ( x<33 ? 2^x : x )"<<endl;
-  cout <<" -v,--verbose\t\tprint some statistics"<<endl;
+  cout <<" -V,--verbose\t\tprint some statistics"<<endl;
   cout <<" -q,--quiet\t\tquite mode"<<endl;
   cout <<" -c, --statelist \t show counterexample states"<<endl;
   cout <<" -t,--trail\t\tproduce trail file"<<endl;
+  cout <<" -f, --fast\t\tuse faster but less accurate algorithm for abstraction" << endl;
   cout <<" -r,--report\t\tproduce report file"<<endl;
   cout <<" -R,--remove\t\tremoves transitions while backpropagating (very slow, saves memory)"
        <<endl;
@@ -330,37 +332,41 @@ int main(int argc, char** argv)
   bool trail = false;
   bool show_ce = false;
 
+	bool fastApproximation = false;
+
 
   static struct option longopts[] = {
     { "help",       no_argument, 0, 'h'},
     { "quiet",      no_argument, 0, 'q'},
     { "trail",      no_argument, 0, 't'},
     { "report",     no_argument, 0, 'r'},
-    { "verbose",    no_argument, 0, 'v'},
+    { "fast",		no_argument, 0, 'f'},
+    { "verbose",    no_argument, 0, 'V'},
     { "log",        no_argument, 0, 'L'},
     { "remove",     no_argument, 0, 'R'},
     { "simple",     no_argument, 0, 's'},
     { "statelist",  no_argument, 0, 'c'},
     { "htsize",     required_argument, 0, 'H' },
     { "basename",   required_argument, 0, 'X' },
-    { "version",    no_argument, 0, 'V'},
+    { "version",    no_argument, 0, 'v'},
     { NULL, 0, NULL, 0 }
   };
 
   ostringstream oss,oss1;
   oss1<<"owcty_reversed";
-  while ((c = getopt_long(argc, argv, "csRhqtrvLX:YZH:VS", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "csfRhqtrvLX:YZH:VS", longopts, NULL)) != -1)
     {
       oss1 <<" -"<<(char)c;
       switch (c) {
       case 'h': usage();return 0; break;
-      case 'V': version();return 0; break;
+      case 'v': version();return 0; break;
       case 'H': htsize=atoi(optarg); break;
       case 'R': remove_trans = true; break;
-      case 'v':
+      case 'V':
       case 'S': print_statistics = true; break;
       case 's': simple = true; break;
       case 'q': quiet = true; break;
+      case 'f': fastApproximation = true; break;
       case 'c': show_ce = true; break;
       case 'L': perform_logging = true; break;
       case 'X': base_name_is_set = true; set_base_name = optarg; break;
@@ -384,21 +390,6 @@ int main(int argc, char** argv)
   /* decisions about the type of an input */
   char * filename = argv[optind];
   int filename_length = strlen(filename);
-  if (filename_length>=2 && strcmp(filename+filename_length-2,".b")==0)
-   {
-    if (distributed.network_id==NETWORK_ID_MANAGER)
-      cout << "Reading bytecode source..." << endl;
-    input_file_ext = ".b";
-    sys = new bymoc_explicit_system_t(gerr);
-   }
- 
-  if (filename_length>=4 && strcmp(filename+filename_length-4,".dve")==0)
-   {
-    if (distributed.network_id==NETWORK_ID_MANAGER)
-      cout << "Reading DVE source..." << endl;
-    input_file_ext = ".dve";
-    sys = new dve_explicit_system_t(gerr);
-   }
 
   if (filename_length>=4 && strcmp(filename+filename_length-4,".bio")==0)
    {
@@ -415,7 +406,7 @@ int main(int argc, char** argv)
   int file_opening;
   try
     {
-      if ((file_opening=sys->read(argv[optind]))&&(distributed.network_id==NETWORK_ID_MANAGER))
+      if ((file_opening=sys->read(argv[optind],fastApproximation))&&(distributed.network_id==NETWORK_ID_MANAGER))
 	{
 	  if (file_opening==system_t::ERR_FILE_NOT_OPEN)
 	    gerr << distributed.network_id << ": " << "Cannot open file ...";
@@ -444,12 +435,6 @@ int main(int argc, char** argv)
       distributed.finalize();
       return 1;
     }
-
-//   if ((trail) && (!sys->get_abilities().system_can_transitions) && (distributed.network_id == 0))
-//     {
-//       cout << "Model of system can't handle transitions, trail won't be produced." << endl;
-//       trail = false;
-//     }  
 
   /* initialization ... */
   if (htsize != 0)
@@ -573,25 +558,13 @@ int main(int argc, char** argv)
       while (!distributed.synchronized(info))  
 	{		
 	  distributed.process_messages();
-//  	  if (distributed.cluster_size == 1 )
-//  	    {
-//  	      cout <<"\rWQ:"<<waiting_queue.size()
-//  		   <<" visited:"<<visited
-//  		   <<" eliminated:"<<eliminated
-//  		   <<"        \r";
-//  	    }
+	  
 	  while(!backtracking_queue.empty())
 	    {
 	      eliminated ++;
 	      ref = backtracking_queue.front();
 	      backtracking_queue.pop();
 	      st.get_app_by_ref(ref,appendix);
-
-//  	      state = st.reconstruct(ref);
-//  	      cout <<"Eliminating state ";
-//  	      sys->DBG_print_state(state,cout,0);
-//  	      cout <<endl;
-//  	      delete_state(state);
 	      
 	      preds_calls++;
 	      array_t<net_state_ref_t>::iterator l_end = appendix.predecessors->end();
@@ -601,15 +574,11 @@ int main(int argc, char** argv)
 		  net_state_ref_t p = *i;
 		  if (p.network_id == distributed.network_id)
 		    {
-//  		      st.get_app_by_ref(p.state_ref,appendix);
-//  		      appendix.remains --;
-//  		      st.set_app_by_ref(p.state_ref,appendix);
-//  		      if (appendix.remains == 0)		      
 		      static_cast<appendix_t*>(st.app_by_ref(p.state_ref))->remains--;
 		      if (static_cast<appendix_t*>(st.app_by_ref(p.state_ref))->remains==0)
-			{
-			  backtracking_queue.push(p.state_ref);
-			}
+				{
+				  backtracking_queue.push(p.state_ref);
+				}
 		    }	 
 		  else
 		    {
@@ -620,8 +589,6 @@ int main(int argc, char** argv)
 		}
 	      if (remove_trans)
 		{
-		  //st.get_app_by_ref(ref,appendix);
-		  //appendix.predecessors->clear();
 		  delete appendix.predecessors;
 		  appendix.predecessors = 0;
 		  st.set_app_by_ref(ref,appendix);
@@ -637,134 +604,118 @@ int main(int argc, char** argv)
 	      succs_calls++;
 	      
 	      if (!simple)
-		{
-
-		  (static_cast<appendix_t*>(st.app_by_ref(ref)))->remains = succs_cont.size();
-//  		  st.get_app_by_ref(ref,appendix);
-//  		  appendix.remains = succs_cont.size();
-//  		  st.set_app_by_ref(ref,appendix);
-		}
-
-//  	      cout <<"Exploring state ";
-//  	      sys->DBG_print_state(state,cout,0);
-//  	      cout <<" ";
-//  	      print(ref);
-//  	      cout <<" - successors:"<<succs_cont.size()<<endl;
-	      
+			{
+			  (static_cast<appendix_t*>(st.app_by_ref(ref)))->remains = succs_cont.size();
+			}	      
+			
 	      if (succs_cont.size() == 0)
-		{
-		  if (!simple)
-		    {
-		      backtracking_queue.push(ref);
-		    }
-		}
+			{
+			  if (!simple)
+				{
+				  backtracking_queue.push(ref);
+				}
+			}
 	      else
-		{	      
-		  for (i=succs_cont.begin(); i!=succs_cont.end(); i++)
-		    {		
-		      state_t r = *i;
-		      if (iteration == 1)
-			{
-			  trans++;
-			}
-		      if (distributed.partition_function(r)!=distributed.network_id)
-			{
-			  if (iteration == 1)
-			    {
-			      transcross++;
-			    }
-                          message.rewind();
-                          message.append_state(r);
-                          message.append_state_ref(ref);
-//////			  memcpy (BUFFER,r.ptr,r.size);
-//////			  memcpy (BUFFER+r.size,(char *)(&ref),sizeof(state_ref_t));
-			  distributed.network.send_message(message,
-						      distributed.partition_function(r),
-						      TAG_SEND_STATE);
-			}
-		      else
-			{
-			  state_ref_t r_ref;
-			  net_state_ref_t net_ref;
-			  net_ref.network_id = distributed.network_id;
-			  net_ref.state_ref = ref;
-			  
- 			  if (!st.is_stored(r,r_ref))  //first visit in first iteration
-			    {
-			      st.insert(r,r_ref);
-			      appendix.inset = iteration;
-			      appendix.visited = 0;
-			      if (!simple)
-				{
-				  appendix.predecessors = new array_t<net_state_ref_t>(1,1);
-				  if (sys->is_accepting(r))
-				    {
-				      appendix.is_accepting = true;
-				    }
-				  else
-				    {
-				      appendix.is_accepting = false;
-				    }
-				}
-			    }
- 			  else // a later iteration
-			    {
-			      st.get_app_by_ref(r_ref,appendix);
-			      if (appendix.inset != iteration)
-				{
-				  appendix.remains = 0;
-				}
-			    }		      
-			  
-			  if (appendix.inset == iteration && appendix.visited != iteration)
- 			    {
-//  			      cout <<" - predecessor for state ";
-//  			      sys->DBG_print_state(r,cout,0);
-//  			      cout <<endl;
-			      visited ++;
-			      if (!simple)
-				{
-				  appendix.predecessors->clear();
-				  appendix.predecessors->push_back(net_ref);
-				  if (appendix.is_accepting)
-				    {
-				      marking_queue.push(r_ref);
-				    }
-				}
-			      appendix.remains = -1; // this will be redefined
-			      appendix.visited = iteration;
-			      st.set_app_by_ref(r_ref,appendix);
-			      waiting_queue.push(r_ref);
-			    }
-			  else
-			    {
-//  			      cout <<" - predecessor for state ";
-//  			      sys->DBG_print_state(r,cout,0);
-//  			      cout <<endl;
-			      if (!simple)
-				{
-				  if (appendix.remains != 0) // => appendix.inset == iteration
-				    {
-				      appendix.predecessors->push_back(net_ref);
-				      st.set_app_by_ref(r_ref,appendix);
-				    }				
-				  else
-				    {
-				      st.set_app_by_ref(r_ref,appendix);
-				      st.get_app_by_ref(ref,appendix);
-				      appendix.remains --;
-				      if (appendix.remains == 0)
+			{	      
+			  for (i=succs_cont.begin(); i!=succs_cont.end(); i++)
+				{		
+				  state_t r = *i;
+				  if (iteration == 1)
 					{
-					  backtracking_queue.push(ref);
+					  trans++;
 					}
-				      st.set_app_by_ref(ref,appendix);
-				    }
+					
+				  if (distributed.partition_function(r)!=distributed.network_id)
+					{
+					  if (iteration == 1)
+						{
+						  transcross++;
+						}
+	                  message.rewind();
+	                  message.append_state(r);
+	                  message.append_state_ref(ref);
+				                  
+					  distributed.network.send_message(message,
+									  distributed.partition_function(r),
+									  TAG_SEND_STATE);
+					}
+				  else
+					{
+					  state_ref_t r_ref;
+					  net_state_ref_t net_ref;
+					  net_ref.network_id = distributed.network_id;
+					  net_ref.state_ref = ref;
+					  
+		 			  if (!st.is_stored(r,r_ref))  //first visit in first iteration
+						{
+						  st.insert(r,r_ref);
+						  appendix.inset = iteration;
+						  appendix.visited = 0;
+						  if (!simple)
+							{
+							  appendix.predecessors = new array_t<net_state_ref_t>(1,1);
+							  if (sys->is_accepting(r))
+								{
+								  appendix.is_accepting = true;
+								}
+							  else
+								{
+								  appendix.is_accepting = false;
+								}
+							}
+						}
+		 			  else // a later iteration
+						{
+						  st.get_app_by_ref(r_ref,appendix);
+						  if (appendix.inset != iteration)
+							{
+							  appendix.remains = 0;
+							}
+						}		      
+					  
+					  if (appendix.inset == iteration && appendix.visited != iteration)
+		 			    {
+						  visited ++;
+						  if (!simple)
+							{
+							  appendix.predecessors->clear();
+							  appendix.predecessors->push_back(net_ref);
+							  if (appendix.is_accepting)
+								{
+								  marking_queue.push(r_ref);
+								}
+							}
+						  appendix.remains = -1; // this will be redefined
+						  appendix.visited = iteration;
+						  st.set_app_by_ref(r_ref,appendix);
+						  waiting_queue.push(r_ref);
+						}
+					  else
+						{
+						  if (!simple)
+							{
+							  if (appendix.remains != 0) // => appendix.inset == iteration
+								{
+								  appendix.predecessors->push_back(net_ref);
+								  st.set_app_by_ref(r_ref,appendix);
+								}				
+							  else
+								{
+								  st.set_app_by_ref(r_ref,appendix);
+								  st.get_app_by_ref(ref,appendix);
+								  appendix.remains --;
+								  if (appendix.remains == 0)
+									{
+									  backtracking_queue.push(ref);
+									}
+								  st.set_app_by_ref(ref,appendix);
+								}
+							}
+						}
+					}
+				  delete_state(r);
 				}
-			    }
 			}
-		      delete_state(r);
-		    }
-		}
 	      delete_state(state);	   	    
 	    }
 	  else
@@ -799,17 +750,9 @@ int main(int argc, char** argv)
 	      st.get_app_by_ref(ref,appendix);
 
 	      if (appendix.remains == 0)
-		{
-		  continue;
-		}
-
-//  	      state = st.reconstruct(ref);
-//  	      cout <<"Marking called for state ";
-//  	      sys->DBG_print_state(state,cout,0);
-//  	      //  	      cout <<" ";
-//  	      //  	      print(ref);
-//  	      cout <<endl;
-//  	      delete_state(state);	      
+			{
+			  continue;
+			}
 	      
 	      preds_calls++;
 	      array_t<net_state_ref_t>::iterator l_end = appendix.predecessors->end();
@@ -821,22 +764,19 @@ int main(int argc, char** argv)
 		  if (p.network_id == distributed.network_id)
 		    {
 		      st.get_app_by_ref(p.state_ref,appendix);
-//  		      state = st.reconstruct(p.state_ref);
-//  		      cout <<"Marking state: ";
-//  		      sys->DBG_print_state(state,cout,0);
 
 		      if (appendix.inset == iteration && appendix.remains >0)
-			{
-//  			  cout <<" YES"<<endl;
-			  delete_state(state);
-			  appendix.inset = iteration+1;
-			  marked ++;
-			  marking_queue.push(p.state_ref);		      
-			}
+				{
+	//  			  cout <<" YES"<<endl;
+				  delete_state(state);
+				  appendix.inset = iteration+1;
+				  marked ++;
+				  marking_queue.push(p.state_ref);		      
+				}
 		      else
-			{
-//  			  cout <<" NO"<<endl;
-			}
+				{
+	//  			  cout <<" NO"<<endl;
+				}
 		      st.set_app_by_ref(p.state_ref,appendix);
 		    }	 
 		  else
@@ -860,9 +800,6 @@ int main(int argc, char** argv)
 	}
 
       iteration ++;
-
-
-//      } while (false);       
 
      } while (info.data.allmarked != (info.data.allstates-info.data.alleliminated) 
 	     && info.data.allmarked!=0 && !simple);  
@@ -928,16 +865,10 @@ int main(int argc, char** argv)
 	      state = ce_stack.top();
 	      sys->get_succs(state,succs_cont);
 	      succ_container_t::iterator i = succs_cont.begin();
-
-//	      sys->print_state(state,cout);
-//  	      cout <<"size:  "<<succs_cont.size()<<endl;
 	      
 	      ce_trying = true;
 	      while (ce_trying)
 		{
-//   		  cout <<" trying ";
-//  		  sys->print_state(*i,cout);
-//  		  cout <<endl;
 		  distributed.network.send_message((*i).ptr,(*i).size,
 					      distributed.partition_function(*i),
 					      TAG_CE_TRY);
@@ -949,9 +880,6 @@ int main(int argc, char** argv)
 		    }		  
 		  if (!ce_trying) // succeeded
 		    {
-//  		      cout <<" SUCCEED ";
-//  		      sys->print_state(*i,cout);
-//  		      cout <<endl;		      
 		      ce_stack.push(*i);
 		    }
 		  else
@@ -967,10 +895,6 @@ int main(int argc, char** argv)
 		}
 	    }
 
-//  	  cout <<"CE ready "
-//  	       <<"("<<ce_stack.size()<<" states)"
-//  	       <<endl;
-
 	  state = ce_stack.top();
 	  ce_stack.pop();
 	  state_t state2;
@@ -979,11 +903,10 @@ int main(int argc, char** argv)
 	      state2=ce_stack.top();
 	      ce.push_front(state2);
 	      if (memcmp(state.ptr,(ce_stack.top()).ptr,state.size)==0)
-		{
-//		  cout << "================" << endl;
-		  ce.mark_cycle_start_front();
-		}
-//	      sys->print_state(state2,cout);
+			{
+	//		  cout << "================" << endl;
+			  ce.mark_cycle_start_front();
+			}
 	      ce_stack.pop();
 	      delete_state(state2);
 	    }	  
@@ -1111,21 +1034,5 @@ int main(int argc, char** argv)
   delete sys;
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

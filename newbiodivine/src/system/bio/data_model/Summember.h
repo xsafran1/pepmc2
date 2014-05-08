@@ -27,15 +27,6 @@ public:
 
 		value_type value(value_type value) const
 		{
-		/*
-			value_type res = (value - min) / (max - min);
-			res = min_value + (res * (max_value - min_value));
-			if (res < 0)
-				res = 0;
-			else if (res > 1)
-				res = 1;
-			return negative ? 1 - res : res;
-		*/
 			value_type res = (value - min) / (max - min);
 			if (res < 0)
 				res = 0;
@@ -61,25 +52,22 @@ private:
 	    value_type theta;
 	    value_type a;
 	    value_type b;
-	    value_type accuracy;
 	    bool positive;
 	    
         step() {}
-		step(std::size_t dim, value_type theta, value_type a, value_type b, value_type acc, bool positive = true)
-                    : dim(dim), theta(theta), a(a), b(b), accuracy(acc), positive(positive) {
+		step(std::size_t dim, value_type theta, value_type a, value_type b, bool positive = true)
+                    : dim(dim), theta(theta), a(a), b(b), positive(positive) {
         	if( (positive && a > b) || (!positive && a < b) ) {
         		value_type temp = a;
         		this.a = b;
         		this.b = temp;
         	}
         }
-        step(const step& s) : dim(s.dim), theta(s.theta), a(s.a), b(s.b), accuracy(s.accuracy), positive(s.positive) {}
+        step(const step& s) : dim(s.dim), theta(s.theta), a(s.a), b(s.b), positive(s.positive) {}
 
 
 		value_type value(value_type value) const
 		{
-			//maybe upgrade:
-			//value_type result = value < theta*accuracy ? a : b; 
 			value_type result = value < theta ? a : b; 
 			return result;
 		}
@@ -89,11 +77,11 @@ private:
                 out << "H(-)(";
             else
                 out << "H(+)(";
-            out << s.dim - 1 << "," << s.theta << "," << s.a << "," << s.b << "," << s.accuracy << ")";
+            out << s.dim - 1 << "," << s.theta << "," << s.a << "," << s.b << ")";
             return out;
 		}
 	};
-
+/*
 	struct hill {
 	    std::size_t dim;		//Warning: index of var_name from Model.h but indexing from 1 (not 0)
 	    value_type theta;
@@ -111,7 +99,7 @@ private:
         		this.b = temp;
         	}
         }
-        hill(const step& s) : dim(s.dim), theta(s.theta), n(s.n), a(s.a), b(s.b), positive(s.positive) {}
+        hill(const hill& s) : dim(s.dim), theta(s.theta), n(s.n), a(s.a), b(s.b), positive(s.positive) {}
 
 
 		value_type value(value_type value) const
@@ -129,6 +117,7 @@ private:
             return out;
 		}
 	};
+*/
 
 public:
 	Summember()
@@ -171,7 +160,7 @@ public:
 		return steps;
 	}
 	
-	std::vector<hill> GetHills() const
+	std::vector<std::size_t> GetHills() const
 	{
 		return hills;
 	}
@@ -208,42 +197,18 @@ public:
 	{
 		ramps.push_back(new_ramp);
 	}
-	/*
-	void AddSigmoid(std::size_t segments,std::size_t dim, value_type k, value_type theta,
-                    value_type a, value_type b, bool positive = 1, bool isInverse = 0)
-	{
-		sigmoid s;
-		s.n = segments;
-		s.dim = dim;
-		s.k = k;
-		s.theta = theta;
-		s.a = a;
-		s.b = b;
-		s.positive = positive;
-		s.isInverse = isInverse;
-		sigmoids.push_back(s);
-	}
-
-	void AddSigmoid(sigmoid & new_sigmoid)
-	{
-		sigmoids.push_back(new_sigmoid);
-	}
-	*/
 
 	void AddSigmoid(std::size_t s)
 	{
 		sigmoids.push_back(s);
 	}
 
-
-
-	void AddStep(std::size_t dim, value_type theta, value_type a, value_type b, value_type accuracy, bool positive = 1) {
+	void AddStep(std::size_t dim, value_type theta, value_type a, value_type b, bool positive = 1) {
 	    step s;
 	    s.dim = dim;
 	    s.theta = theta;
 	    s.a = a;
 	    s.b = b;
-	    s.accuracy = accuracy;
 	    s.positive = positive;
 	    steps.push_back(s);
 	}
@@ -252,6 +217,10 @@ public:
 	    steps.push_back(new_step);
 	}
 	
+	void AddHill(size_t i) {
+		hills.push_back(i);
+	}
+/*
 	void AddHill(std::size_t dim, value_type theta, value_type n, value_type a, value_type b, bool positive = 1) {
 		hill s;
 		s.dim = dim;
@@ -266,7 +235,7 @@ public:
 	void AddHill(hill& new_) {
 	    hills.push_back(new_);
 	}
-
+*/
 	std::size_t hasParam() const
 	{
 		return (param != 0 ? 1 : 0);
@@ -277,7 +246,8 @@ public:
 	    constant *= -1;
 	}
 
-	std::vector< Summember<T> > sigmoidAbstraction(std::vector<ramp> ramps, std::size_t replacedSigmoid /*value, not his index*/);
+	std::vector< Summember<T> > sigmoidAbstraction(std::vector<ramp> ramps, std::size_t replacedIndex);
+	std::vector< Summember<T> > hillAbstraction(std::vector<ramp> ramps, std::size_t replacedIndex);
 
 
 	const Summember<T>  operator*(/*const*/ Summember<T> &);
@@ -296,24 +266,47 @@ private:
 	//Warning: sigmoids contains indexes to Model.sigmoids vector, BUT incremented by 1 (Proper using is Model.getSigmoids().at(sigmoids.at(i)-1))
 	std::vector<std::size_t> sigmoids;
 	std::vector<step> steps;
-	std::vector<hill> hills;
+	//Warning: hills contains indexes to Model.hills vector, BUT incremented by 1 (Proper using is Model.getHills().at(hills.at(i)-1))
+	std::vector<std::size_t> hills;
 
 };
 
 
 template <typename T>
-std::vector< Summember<T> > Summember<T>::sigmoidAbstraction(std::vector<ramp> ramps, std::size_t replacedSigmoid) {
+std::vector< Summember<T> > Summember<T>::hillAbstraction(std::vector<ramp> ramps, std::size_t replacedIndex) {
 
     std::vector< Summember<T> > result;
-    std::cout << "removing sigmoid with index " << replacedSigmoid-1 << " and size before is " << sigmoids.size() <<"\n";
+//    std::cout << "removing hill function with index " << replacedIndex-1 << " and size before is " << hills.size() <<"\n";
+    for(std::vector<std::size_t>::iterator it = hills.begin(); it != hills.end(); it++) {
+        if(*it == replacedIndex) {
+            hills.erase(it);
+            break;
+        }
+    }
+//    std::cout << "size after is " << hills.size() << "\n";
+
+    for(int r = 0; r < ramps.size(); r++) {
+        Summember<T> sum;
+        sum.AddRamp(ramps.at(r));
+        result.push_back(sum * (*this));
+    }
+
+    return result;
+}
+
+
+template <typename T>
+std::vector< Summember<T> > Summember<T>::sigmoidAbstraction(std::vector<ramp> ramps, std::size_t replacedIndex) {
+
+    std::vector< Summember<T> > result;
+//    std::cout << "removing sigmoid with index " << replacedIndex-1 << " and size before is " << sigmoids.size() <<"\n";
     for(std::vector<std::size_t>::iterator it = sigmoids.begin(); it != sigmoids.end(); it++) {
-        if(*it == replacedSigmoid) {
+        if(*it == replacedIndex) {
             sigmoids.erase(it);
             break;
         }
     }
-    //remove(this->sigmoids.begin(), this->sigmoids.end(), replacedSigmoid);
-    std::cout << "size after is " << sigmoids.size() << "\n";
+//    std::cout << "size after is " << sigmoids.size() << "\n";
 
     for(int r = 0; r < ramps.size(); r++) {
         Summember<T> sum;
@@ -344,7 +337,7 @@ std::ostream& operator<<(std::ostream& out, const Summember<U>& sum) {
         out << "*" << sum.GetSteps().at(i);
     }
     for(uint i = 0; i < sum.GetHills().size(); i++) {
-        out << "*" << sum.GetHills().at(i);
+        out << "*Hill(" << sum.GetHills().at(i) - 1 << ")";
     }
 
     return out;
@@ -414,13 +407,13 @@ const Summember<T> Summember<T>::operator*(/*const*/ Summember<T> & s2)
 		s_final.AddStep(*it);
 	}
 	
-	std::vector<hill> hills1 = s1.GetHills();
-	for (typename std::vector<hill>::iterator it = hills1.begin(); it != hills1.end(); it++) {
+	std::vector<std::size_t> hills1 = s1.GetHills();
+	for (typename std::vector<std::size_t>::iterator it = hills1.begin(); it != hills1.end(); it++) {
 		s_final.AddHill(*it);
 	}
 
-	std::vector<hill> hills2 = s2.GetHills();
-	for (typename std::vector<hill>::iterator it = hills2.begin(); it != hills2.end(); it++) {
+	std::vector<std::size_t> hills2 = s2.GetHills();
+	for (typename std::vector<std::size_t>::iterator it = hills2.begin(); it != hills2.end(); it++) {
 		s_final.AddHill(*it);
 	}
 

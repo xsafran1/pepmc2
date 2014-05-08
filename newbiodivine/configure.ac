@@ -39,21 +39,15 @@ AX_CREATE_STDINT_H(src/divine-int.hh)
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
-#AC_FUNC_GETLOADAVG
 AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_FUNC_REALLOC
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([alarm floor gettimeofday memset strchr strdup])
 
-#AC_PROG_JAVA
-#AC_PROG_JAVAC
 
 # Checking for presence of MPI:
 ACX_MPI(,[AC_MSG_WARN([Could not find properly installed MPI. Library libdivine.a cannot be compiled. Only sequential code will be compiled!!!], 1)])
-
-# Checking for presence of mCRL2:
-ACX_MCRL2
 
 AC_DIVINE
 
@@ -65,15 +59,11 @@ sinclude(ac_all_deps_of_cvs.m4)
 AM_CONDITIONAL([BUILDSUPPORT], [test "$IS_CVS_COPY" = yes])
 AM_CONDITIONAL([CVSDATAPATH], [test "$IS_CVS_COPY" = yes])
 AM_CONDITIONAL([HAVEMPI], [test "x$MPI_FOUND" = "x1"])
-AM_CONDITIONAL([HAVEMCRL2], [test "x$MCRL2" = "x1"])
 
 #including macros for testing of command line parameters
 #there are also set initial values modified by command line parameters
 sinclude(support/src/makeutils/ac_parameters.m4)
 
-AM_CONDITIONAL([DONTBUILDGUI], [test -z "$GUIDIR" || test "x$JAVACPROBLEM" = "x1" || test "x$JAVAPROBLEM" = "x1"])
-AM_CONDITIONAL([JAVA_OK], [test "x$JAVAPROBLEM" != "x1"])
-AM_CONDITIONAL([JAVAC_OK], [test "x$JAVACPROBLEM" != "x1"])
 AM_CONDITIONAL([FORCE_CVS_STYLE_COMPILATION], 
                [test "$NON_CVS_STYLE_COMPILATION" = no &&
 		test "$IS_CVS_COPY" = yes])
@@ -86,44 +76,17 @@ AC_CONFIG_FILES([
 		tool/Makefile
 		tool/ltl2ba/Makefile
 		tool/model_manipulation/Makefile
-		tool/model_manipulation/jar/Makefile
-		tool/state_spaces/Makefile
 		tool/owcty_reversed/Makefile
 		tool/owcty/Makefile
 		tool/distr_map/Makefile
 		tool/utils/Makefile
-                support/src/makeutils/Makefile
-                support/Makefile
-                support/src/regression_tests/dve/transition/Makefile
-                support/src/regression_tests/dve/process/Makefile
-                support/src/regression_tests/dve/expression/Makefile
-		support/src/regression_tests/dve/Makefile
-                support/src/regression_tests/Makefile
-                support/src/debug/Makefile
-                support/src/Makefile
-                support/etc/doxygen/Makefile
-                support/etc/Makefile
-		support/src/local/Makefile
+        support/Makefile
+        support/src/debug/Makefile
+        support/src/makeutils/Makefile
+        support/src/Makefile
+        support/etc/doxygen/Makefile
+        support/etc/Makefile
 	       ])
-
-if test "x$JAVAPROBLEM" = "x1"; then
-	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	echo "!!                                                            !!"
-	echo "!!  Properly installed Java not found. NIPS compiler and GUI  !!"
-	echo "!!  will not run!                                             !!"
-	echo "!!                                                            !!"
-	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-fi
-
-if test "x$JAVACPROBLEM" = "x1"; then
-	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	echo "!!                                                            !!"
-	echo "!!  Properly installed Java compiler not found.               !!"
-	echo "!!  GUI will not be compiled!                                 !!"
-	echo "!!                                                            !!"
-	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-fi
-
 
 
 if test "x$MPI_FOUND" != "x1"; then

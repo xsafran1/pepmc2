@@ -10,7 +10,7 @@ EQ: E2F1 = kp + k2*a*a*0.0625*Hillm(E2F1,4,2,1,0)*Hillp(E2F1,4,2,0,1)*Hillm(pRB,
 THRES: pRB:  0, 1, 2, 3, 4, 5, 6, 7, 8, 10
 THRES: E2F1: 0, 1, 2, 4, 6, 8, 10, 12, 15
 
-INIT: pRB: 0, 1; E2F1: 2, 4
+INIT: pRB: 0, 1; E2F1: 1, 2
 
 process LTL_property {
 state q1, q2;

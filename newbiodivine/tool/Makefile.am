@@ -7,6 +7,5 @@ endif
 
 SUBDIRS=ltl2ba \
 	model_manipulation \
-	state_spaces \
 	utils \
 	$(MPIGO)

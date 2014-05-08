@@ -82,6 +82,7 @@ bool statistics=false;
 bool quietmode=false;
 bool logging = false;
 bool base_name = false;
+bool fastApproximation = false;
 string set_base_name;
 
 size_int_t htsize=0;
@@ -140,16 +141,12 @@ void usage()
   cout <<" -h, --help \t show this help"<<endl;
   cout <<" -r, --report \t produce report (file.distr_map.report)"<<endl;
   cout <<" -t, --trail \t produce trail file (file.distr_map.trail)"<<endl;
+  cout <<" -f, --fast \t use faster but less accurate algorithm for abstraction" << endl;
   cout <<" -c, --statelist \t show counterexample states"<<endl;
   cout <<" -H x, --htsize x \t set the size of hash table to ( x<33 ? 2^x : x )"<<endl;
   cout <<" -S, --printstats \t print some statistics"<<endl;
   cout <<" -q, --quiet \t quiet mode (do not print anything "
        <<"- overrides all except -h and -v)"<<endl;
-  //  cout <<" -P x\tset part of the state used by partition function:"<<endl;
-  //  cout <<"\t 0 - full state (default)"<<endl;
-  //  cout <<"\t 1 - every second byte"<<endl;
-  //  cout <<"\t 2 - the second half"<<endl;
-  //  cout <<"\t 3 - the first three quarters"<<endl;
   cout <<" -L \t perform logging"<<endl;
   cout <<" -X w \t sets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
   cout <<" -Y \t reserved for GUI"<<endl;
@@ -1053,6 +1050,7 @@ int main(int argc, char **argv)
 		{ "quiet",      no_argument, 0, 'q'},
 		{ "trail",      no_argument, 0, 't'},
 		{ "report",     no_argument, 0, 'r'},
+		{ "fast",		no_argument, 0, 'f'},
 		{ "htsize",     required_argument, 0, 'H' },
 		{ "statelist",  no_argument, 0, 'c'},
 		{ "printstats", no_argument, 0, 'S'},
@@ -1060,11 +1058,10 @@ int main(int argc, char **argv)
 		{ 0, 0, 0, 0 }
       };
 
-      while ((c = getopt_long(argc, argv, "LX:YZH:Sqhtrvc", longopts, 0)) != -1)
+      while ((c = getopt_long(argc, argv, "LX:YZH:Sfqhtrvc", longopts, 0)) != -1)
 		{
 		  oss1 <<" -"<<(char)c;
 		  switch (c) {
-				//	case 'P': pfunc=atoi(optarg); break;
 			  case 'h': 
 			  	if (distributed.network_id == 0) 
 				{ 
@@ -1078,6 +1075,7 @@ int main(int argc, char **argv)
 			  case 'S': statistics = true;break;
 			  case 'q': quietmode = true;break;
 			  case 't': trail=true;break;
+			  case 'f': fastApproximation = true; break;
 			  case 'r': report = true;break;
 			  case 'c': show_ce = true; break;
 			  case 'v': 
@@ -1133,22 +1131,6 @@ int main(int argc, char **argv)
       char * filename = argv[optind];
       int filename_length = strlen(filename);
 
-      if (filename_length>=2 && strcmp(filename+filename_length-2,".b")==0)
-		{
-		  if (nid==0)
-			cout << "Reading bytecode source..." << endl;
-		  input_file_ext = ".b";
-		  p_sys = new bymoc_explicit_system_t(gerr);
-		}
-
-      if (filename_length>=4 && strcmp(filename+filename_length-4,".dve")==0)
-		{
-		  if (nid==0)
-			cout << "Reading DVE source..." << endl;
-		  input_file_ext = ".dve";
-		  p_sys = new dve_explicit_system_t(gerr);
-		}
-
       if (filename_length>=4 && strcmp(filename+filename_length-4,".bio")==0)
 		{
 		  if (nid==0)
@@ -1162,11 +1144,12 @@ int main(int argc, char **argv)
       int file_opening;
       try
 		{
-		  if ((file_opening=p_sys->read(argv[optind]))&&(nid==0))
+		  if ((file_opening=p_sys->read(argv[optind],fastApproximation))&&(nid==0))
 			{
 			  if (file_opening==system_t::ERR_FILE_NOT_OPEN)
-			gerr << nid << ": " << "Cannot open file ...";
-			  else gerr << nid << ": " << "Syntax error ...";
+				gerr << nid << ": " << "Cannot open file ...";
+			  else 
+			  	gerr << nid << ": " << "Syntax error ...";
 			}
 		  if (file_opening)
 			gerr << thr();
@@ -1186,12 +1169,6 @@ int main(int argc, char **argv)
 		{
 		  gerr << nid << ": "<< "Cannot work with other than standard Buchi accepting condition." <<thr();
 		}
-
-//       if ((trail) && (!p_sys->get_abilities().system_can_transitions) && (nid == 0))
-// 		{
-//	 	  cout << "Model of system can't handle transitions, trail won't be produced." << endl;
-//	 	  trail = false;
-// 		}
 
       st.init();
 

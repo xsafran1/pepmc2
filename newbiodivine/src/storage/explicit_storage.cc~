@@ -1,5 +1,5 @@
 #include "storage/explicit_storage.hh"
-#include "system/mcrl2_system.hh"
+//#include "system/mcrl2_system.hh"
 #include <string>
 #include <sstream>
 
@@ -61,24 +61,6 @@ explicit_storage_t::explicit_storage_t(error_vector_t& errorvector):errvec(error
   mem_max_used=0;
 
 }
-
-
-void explicit_storage_t::clean() {
-  initialized = false;
-
-  compression_method = NO_COMPRESS;
-
-  ht_size = 65536 * 64;  // 2^22
-  col_init_size = 1;
-  col_resize = 1;
-
-  appendix_size = 0;
-
-  mem_limit=0;   //no limit
-  mem_used=0;
-  mem_max_used=0;
-}
-
 
 // }}}
 // {{{ init 
