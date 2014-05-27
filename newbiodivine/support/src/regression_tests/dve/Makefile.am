@@ -1,2 +1,0 @@
-SUBDIRS=expression process transition
-
