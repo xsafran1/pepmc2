@@ -310,8 +310,6 @@ void usage()
   cout <<" -s,--simple\t\tperform simple reachability only"<<endl;
   cout <<" -L,--log\t\tproduce logfiles (log period is 1 second)"<<endl;
   cout <<" -X w\t\t\tsets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
-  cout <<" -Y\t\t\treserved for GUI"<<endl;
-  cout <<" -Z\t\t\treserved for GUI"<<endl;
 }
 
 
@@ -354,7 +352,7 @@ int main(int argc, char** argv)
 
   ostringstream oss,oss1;
   oss1<<"owcty_reversed";
-  while ((c = getopt_long(argc, argv, "csfRhqtrvLX:YZH:VS", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "csfRhqtrvLX:H:VS", longopts, NULL)) != -1)
     {
       oss1 <<" -"<<(char)c;
       switch (c) {

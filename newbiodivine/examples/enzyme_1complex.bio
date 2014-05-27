@@ -17,5 +17,3 @@ INIT: S:25,50; E:95,100; ES:0.01,5; P:0.01,10
 
 system async;
 
-//REFINETRESHS: 1
-//SIGNIFICANCE: 0.9

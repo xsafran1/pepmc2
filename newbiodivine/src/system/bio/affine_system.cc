@@ -70,105 +70,6 @@ std::queue<std::string>  split(std::string _separator, std::string _what)
 //===================================================================
 // affine_system_t members
 //===================================================================
-/*
-void affine_system_t::decrement_parametrisations_count() {
-	std::map<std::string, std::vector<real_t> >::iterator mit;
-	for(mit = params.begin(); mit != params.end(); mit++) {
-		if(mit->second.size() > 1) {
-			mit->second.pop_back();
-			break;
-		}
-	}
-}
-
-int affine_system_t::parametrisation(std::string fileName) {
-
-	bool dbg = true;
-	int count = 1;
-	
-	std::ifstream paramFile(fileName);
-	if(paramFile.is_open()) {
-	
-		std::string line;
-		while(std::getline(paramFile,line).good()) {
-		
-			std::queue<std::string> splited;
-			trim(line);
-			splited = split(":",line);
-			
-			if(splited.size() != 2)
-				error("affine_system_t::parametrisation","bad format of line in file");
-				
-			std::string name = splited.front();
-			splited.pop();
-			
-			if(dbg) std::cerr << "Hladame parameter " << name << std::endl;
-			
-			bool broken = false;
-			for (int i = 0; i < model.getEquations().size(); i++) {
-				for (int s = 0; s < model.getEquations().at(i).second.size(); s++ ) {
-					if( model.getEquations().at(i).second.at(s).hasParam() && 
-						model.getParamName( model.getEquations().at(i).second.at(s).GetParam() - 1 ).compare(name) == 0) {
-						broken = true;
-						break;
-					}
-				}
-			}
-			if(!broken) {
-				if(dbg) std::cerr << "Neznamy parameter " << name << " - preskakujeme\n";
-				continue;
-			}
-			
-			std::vector<real_t> values;
-			int semiCount = 0;
-			
-			if(splited.front().find(';') == std::string::npos) {
-				
-				splited = split(",",splited.front());
-				
-				while(!splited.empty()) {
-					values.push_back((real_t)std::stod(splited.front()));
-					splited.pop();
-					semiCount++;
-				}
-			} else {
-				
-				splited = split(";",splited.front());
-				
-				if(splited.size() != 2)
-					error("affine_system_t::parametrisation","bad format of line in file");
-					
-				real_t part = (real_t)std::stod(splited.back());
-				
-				splited = split(",",splited.front());
-				
-				if(splited.size() != 2)
-					error("affine_system_t::parametrisation","bad format of line in file");
-				
-				real_t firstValue = (real_t)std::stod(splited.front());
-				real_t lastValue = (real_t)std::stod(splited.back());
-				
-				for(real_t v = firstValue; v < lastValue; v += part) {
-					semiCount++;
-					values.push_back(v);
-				}
-				semiCount++;
-				values.push_back(lastValue);
-			}
-			
-			count *= semiCount;
-			params[name] = values;
-		}
-	} else {
-		error("affine_system_t::parametrisation","parametrisation file cannot be opened");
-	}
-	return count;
-}
-
-void affine_system_t::get_parameters(std::map<std::string, std::vector<double> >& p) {
-	model.set_parametrisation(p);
-}
-*/
 
 void affine_system_t::set_zero_range(real_t _zero)
 {
@@ -300,7 +201,7 @@ std::string affine_system_t::write_state(divine::state_t _state)
 		  retval <<"pre-initial]";	       	   
 		  return retval.str();	  
 		}
-      retval << /*vars[i].treshs[aux]*/model.getThresholdForVarByIndex(i, aux) << "(" << aux << ")" << (i == get_dim()-1?"":",");
+      retval << model.getThresholdForVarByIndex(i, aux) << "(" << aux << ")" << (i == get_dim()-1?"":",");
     }
   if (get_with_property()) 
     {
@@ -636,7 +537,6 @@ size_t affine_system_t::refineTreshs( size_t it )
 
 // _where musi byt pole indexov, kde kazda premenna ma jeden index a toto poradie je rovnake ako poradie premennych v poli vars.
 // Tento index ukazuje do pola tresholdov danej premennej na danom poradi a urcuje tak presnu suradnicu v jednej dimenzii (cize hodnotu tejto premennej).
-//TODO: bude treba pocitat, ktora rampa sa v tom danom bode nachadza a jaku tam ma hodnotu
 real_t affine_system_t::value(size_t *_where, size_t _var)
 {
   bool dbg = false;
@@ -1230,7 +1130,7 @@ void affine_system_t::parse(std::string _token)
   size_t pos;
   std::queue<std::string> fields;
   std::queue<std::string> fields1;
-
+/*
   // ---- VARS ----
   if ((pos=_token.find("VARS:"))!=std::string::npos)
     {
@@ -1501,7 +1401,7 @@ void affine_system_t::parse(std::string _token)
       
     }
   
-
+*/
   // ---- process ----
   	if ((pos=_token.find("process"))!=std::string::npos)
     {
@@ -1903,33 +1803,7 @@ slong_int_t affine_system_t::read(const char * const fn)
 	trim(part);
 	parse(part);
 
-/*
-    while (!model.empty())
-      {
-        std::string part=getNextPart(model);
-        parse(part);
-      }
-    // check_sanity();    
-
-    if ( refinement_iterations>0 )
-      {	
-	precision_thr=compute_treshold_precision();
-	refineTreshs( refinement_iterations );
-	update_initials();
-      }
-
-    precision_thr=compute_treshold_precision();
-
-    if ( 1 )
-      { 
-	print_treshs();
-	//print_initials();
-      }
-*/
-
-	//TODO: treba upravit miesto get_dim() nahradu z model
     array_of_values = static_cast<real_t*>(malloc(sizeof(real_t)*model.getDims()*4));  //4 = up/down * inside/outside
-//    array_of_values = static_cast<real_t*>(malloc(sizeof(real_t)*get_dim()*4));  //4 = up/down * inside/outside
   }
   else
     {
@@ -1973,7 +1847,7 @@ size_t affine_system_t::get_dim()
 {
   if (inited!=0)
     {
-      return model.getDims();//dim;
+      return model.getDims();
     }
   else
     error("get_dim",1);
@@ -1992,21 +1866,17 @@ std::string affine_system_t::get_varname(size_t _var)
 {
   if (inited==0)
     error("get_varname",1);
-  if (_var >= model.getDims())//dim)
+  if (_var >= model.getDims())
     error ("get_varname",2);
-  return model.getVariable(_var);//vars[_var].name;
+  return model.getVariable(_var);
 }
 
 //===================================================================
 size_t affine_system_t::get_varid(std::string _name)
 {
   if (inited==0) error ("get_varid",1);
-  size_t i = model.getVariableIndex(_name);//0;
-/*
-  while (i < dim && vars[i].name != _name) // ORDER OF EVALUATION
-    i++;
-  if (i==dim) error ("get_varid","Unknown variable name -- "+ _name + ".");
-*/
+  size_t i = model.getVariableIndex(_name);
+
 	if(i == UINT_MAX)
 		error ("get_varid","Unknown variable name -- "+ _name + ".");
 
@@ -2019,9 +1889,9 @@ real_t affine_system_t::get_tresh(size_t _var, size_t _tresh_id)
 {
   if (inited==0)
     error("get_tresh",1);
-  if (_var >= model.getDims()/*dim*/ || _tresh_id >= get_treshs(_var))//vars[_var].n_treshs)
+  if (_var >= model.getDims() || _tresh_id >= get_treshs(_var))
     error ("get_tresh",2);
-  return model.getThresholdForVarByIndex(_var,_tresh_id);//vars[_var].treshs[_tresh_id];
+  return model.getThresholdForVarByIndex(_var,_tresh_id);
 }
 
 //===================================================================
@@ -2045,9 +1915,9 @@ size_t affine_system_t::get_tresh_pos( size_t _var, real_t _thr_value)
  {
   if (inited==0)
     error("get_treshs",1);
-  if (_var >= model.getDims())//dim)
+  if (_var >= model.getDims())
     error ("get_treshs",2);
-  return model.getThresholdsForVariable(_var).size();//vars[_var].n_treshs;
+  return model.getThresholdsForVariable(_var).size();
  }
 
 
@@ -2070,7 +1940,7 @@ size_t affine_system_t::get_sums(size_t _var)
     error("get_sums",1);
   if (_var >= get_dim())
     error ("get_sums",2);
-  return model.getEquationForVariable(_var).size();//vars[_var].n_sums;
+  return model.getEquationForVariable(_var).size();
 }
 
 
@@ -2229,7 +2099,7 @@ void affine_system_t::write(std::ostream & outs)
   outs<<endl;
   for (size_t i=0; i<get_dim(); i++)
     {
-      outs<<"EQ:d";
+      outs<<"EQ:";
       outs<<get_varname(i);
       outs<<"=";
       for (size_t j=0; j<get_sums(i); j++)

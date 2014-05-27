@@ -13,7 +13,8 @@ EQ: v = Hm(u,th_v,1,0)*( Hm(u,th_o,1,0) - v )*Hp(u,th_o,Tm_v1~,Tm_v2~) - Hp(u,th
 EQ: w = Hm(u,th_w,1,0)*( ( Hm(u,th_o,1,0)*( 1 - u*T_v_inf~ ) + Hp(u,thm_v,0,1)*w_inf_star ) - w )*Sminv(u,km_w,um_w,Tm_w2,Tm_w1) - Hp(u,th_w,0,1)*w*Tp_w~
 EQ: s = ( Sp(u,k_s,u_s,0,1) - s )*Hp(u,th_w,T_s1~,T_s2~) + Hillp(u,0.5,2,0,1)
 
-THRES: u: 0, 0.001, 0.006, 0.03, 0,13, 0.3, 0.65, 0.9087, 1.5
+
+THRES: u: 0, 0.001, 0.006, 0.03, 0.13, 0.3, 0.65, 0.9087, 1.5
 THRES: v: 0.0, 0.95, 1.0
 THRES: w: 0.0, 0.95, 1.0
 THRES: s: 0.0, 0.01, 1.0

@@ -5,6 +5,8 @@
 #include <cmath>
 #include <sstream>
 #include <fstream>
+#include <limits>
+#include <iomanip>
 #include "Summember.h"
 #include "Model.h"
 
@@ -218,8 +220,6 @@ void Entite<T>::PutRp(std::string var, std::string theta1, std::string theta2, s
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-
 }
 
 template <typename T>
@@ -235,8 +235,6 @@ void Entite<T>::PutRm(std::string var, std::string theta1, std::string theta2, s
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-
 }
 
 template <typename T>
@@ -259,8 +257,6 @@ void Entite<T>::PutRpCoor(std::string var, std::string theta1, std::string theta
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-
 }
 
 template <typename T>
@@ -283,8 +279,6 @@ void Entite<T>::PutRmCoor(std::string var, std::string theta1, std::string theta
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-
 }
 
 template <typename T>
@@ -310,8 +304,6 @@ void Entite<T>::PutSp(std::string points, std::string var, std::string k, std::s
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-
 }
 
 template <typename T>
@@ -337,8 +329,6 @@ void Entite<T>::PutSm(std::string points, std::string var, std::string k, std::s
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-
 }
 
 template <typename T>
@@ -370,8 +360,6 @@ void Entite<T>::PutSpInv(std::string points, std::string var, std::string k, std
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-
 }
 
 template <typename T>
@@ -403,8 +391,6 @@ void Entite<T>::PutSmInv(std::string points, std::string var, std::string k, std
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-
 }
 
 template <typename T>
@@ -414,6 +400,22 @@ void Entite<T>::PutHp(std::string var, std::string theta, std::string a, std::st
     T aa = getNumberFromString(a);
     T bb = getNumberFromString(b);
     
+    T eps = std::numeric_limits<value_type>::epsilon();
+    T th1 = th - ( eps == 0 ? 1 : eps );
+    T th2 = th + ( eps == 0 ? 1 : eps );
+    
+    //saving new thresholds th1 and th2
+    model.AddThresholdName(var);
+    std::stringstream ss;
+    ss.precision(20);
+    ss << th1;
+    model.AddThresholdValue(ss.str());
+    std::stringstream ss2;
+    ss2.precision(20);    
+    ss2 << th2;
+    model.AddThresholdValue(ss2.str());
+    
+
     if(aa > bb) {
     	T temp = aa;
     	aa = bb;
@@ -423,13 +425,11 @@ void Entite<T>::PutHp(std::string var, std::string theta, std::string a, std::st
     Summember<T> new_summember;
     for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
-        	new_summember.AddStep(i + 1, th, aa, bb, true);
+			new_summember.AddRamp(i + 1, th1, th2, aa, bb, false);
             AddSummember(new_summember);
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-    
 }
 
 template <typename T>
@@ -438,6 +438,22 @@ void Entite<T>::PutHm(std::string var, std::string theta, std::string a, std::st
 	T th = getNumberFromString(theta);
     T aa = getNumberFromString(a);
     T bb = getNumberFromString(b);
+   
+    T eps = std::numeric_limits<value_type>::epsilon();
+    T th1 = th - ( eps == 0 ? 1 : eps );
+    T th2 = th + ( eps == 0 ? 1 : eps );
+    
+    //saving new thresholds th1 and th2
+    model.AddThresholdName(var);
+    std::stringstream ss;
+    ss.precision(20);    
+    ss << th1;
+    model.AddThresholdValue(ss.str());
+    std::stringstream ss2;
+    ss2.precision(20);    
+    ss2 << th2;
+    model.AddThresholdValue(ss2.str());
+        
     
     if(aa < bb) {
     	T temp = aa;
@@ -448,13 +464,11 @@ void Entite<T>::PutHm(std::string var, std::string theta, std::string a, std::st
     Summember<T> new_summember;
     for(uint i = 0; i < model.getVariables().size(); i++) {
         if(var.compare(model.getVariable(i)) == 0) {
-        	new_summember.AddStep(i + 1, th, aa, bb, false);
+			new_summember.AddRamp(i+1, th1, th2, aa, bb, true);
             AddSummember(new_summember);
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-    
 }
 
 template <typename T>
@@ -481,8 +495,6 @@ void Entite<T>::PutHillp(std::string var, std::string theta, std::string n, std:
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-        
 }
 
 template <typename T>
@@ -509,8 +521,6 @@ void Entite<T>::PutHillm(std::string var, std::string theta, std::string n, std:
             return;
         }
     }
-    //TODO: i dont know what will happen if var wasn't find in variables
-    
 }
 
 template <typename T>

@@ -15,25 +15,23 @@ sequential_part_sources = $(tsrc)/common/reporter.cc \
                           $(tsrc)/common/error.cc \
                           $(tsrc)/common/sysinfo.cc \
                           $(tsrc)/common/hash_function.cc \
-			  $(tsrc)/common/bitarray.cc \
-                          $(tsrc)/system/bio/affine_atomic_propositions.cc \
-			  $(tsrc)/system/bio/affine_property.cc \
-                          $(tsrc)/system/bio/affine_system.cc \
-                          $(tsrc)/system/bio/affine_explicit_system.cc \
+			  			  $(tsrc)/common/bitarray.cc \
+                      $(tsrc)/system/bio/affine_atomic_propositions.cc \
+					  $(tsrc)/system/bio/affine_property.cc \
+                      $(tsrc)/system/bio/affine_system.cc \
+                      $(tsrc)/system/bio/affine_explicit_system.cc \
                           $(tsrc)/system/transition.cc \
-			  $(tsrc)/system/prob_system.cc \
-			  $(tsrc)/system/prob_transition.cc \
                           $(tsrc)/system/state.cc \
                           $(tsrc)/system/path.cc \
                           $(tsrc)/system/system.cc \
                           $(tsrc)/system/system_trans.cc \
                           $(tsrc)/system/process.cc \
-                          $(tsrc)/storage/compressor.cc \
-                          $(tsrc)/storage/explicit_storage.cc
+                      $(tsrc)/storage/compressor.cc \
+                      $(tsrc)/storage/explicit_storage.cc
 
 # Paths to sources for the distributed part of the design (using MPI)
 distributed_part_sources = $(tsrc)/common/distr_reporter.cc \
-			   $(tsrc)/distributed/message.cc \
+			  			   $(tsrc)/distributed/message.cc \
                            $(tsrc)/distributed/network.cc \
                            $(tsrc)/distributed/distributed.cc \
                            $(tsrc)/common/logger.cc

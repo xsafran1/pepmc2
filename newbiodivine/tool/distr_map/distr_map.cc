@@ -144,13 +144,11 @@ void usage()
   cout <<" -f, --fast \t use faster but less accurate algorithm for abstraction" << endl;
   cout <<" -c, --statelist \t show counterexample states"<<endl;
   cout <<" -H x, --htsize x \t set the size of hash table to ( x<33 ? 2^x : x )"<<endl;
-  cout <<" -S, --printstats \t print some statistics"<<endl;
+  cout <<" -V, --verbose \t print some statistics"<<endl;
   cout <<" -q, --quiet \t quiet mode (do not print anything "
        <<"- overrides all except -h and -v)"<<endl;
-  cout <<" -L \t perform logging"<<endl;
+  cout <<" -L, --log \t perform logging"<<endl;
   cout <<" -X w \t sets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
-  cout <<" -Y \t reserved for GUI"<<endl;
-  cout <<" -Z \t reserved for GUI"<<endl;  
 }
 
 void vypis_state_ref(state_ref_t ref, std::ostream &outs)
@@ -1051,14 +1049,15 @@ int main(int argc, char **argv)
 		{ "trail",      no_argument, 0, 't'},
 		{ "report",     no_argument, 0, 'r'},
 		{ "fast",		no_argument, 0, 'f'},
+	    { "log",        no_argument, 0, 'L'},
 		{ "htsize",     required_argument, 0, 'H' },
 		{ "statelist",  no_argument, 0, 'c'},
-		{ "printstats", no_argument, 0, 'S'},
+		{ "verbose", 	no_argument, 0, 'V'},
 		{ "version",    no_argument, 0, 'v'},
 		{ 0, 0, 0, 0 }
       };
 
-      while ((c = getopt_long(argc, argv, "LX:YZH:Sfqhtrvc", longopts, 0)) != -1)
+      while ((c = getopt_long(argc, argv, "LX:H:SVfqhtrvc", longopts, 0)) != -1)
 		{
 		  oss1 <<" -"<<(char)c;
 		  switch (c) {
@@ -1072,6 +1071,7 @@ int main(int argc, char **argv)
 			  case 'L': logging = true; break;
 			  case 'X': set_base_name = optarg; base_name = true; break;
 			  case 'H': htsize=atoi(optarg);break;
+			  case 'V':
 			  case 'S': statistics = true;break;
 			  case 'q': quietmode = true;break;
 			  case 't': trail=true;break;

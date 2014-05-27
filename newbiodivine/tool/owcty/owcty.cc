@@ -540,8 +540,6 @@ void usage()
   cout <<" -s,--simple\t\tperform simple reachability only"<<endl;
   cout <<" -L,--log\t\tproduce logfiles (log period is 1 second)"<<endl;
   cout <<" -X w\t\t\tsets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
-  cout <<" -Y\t\t\treserved for GUI"<<endl;
-  cout <<" -Z\t\t\treserved for GUI"<<endl;
 }
 
 void generate_successors(state_t state, state_ref_t ref, enabled_trans_container_t *enb, succ_container_t *succs_cont)
@@ -1059,7 +1057,7 @@ int main(int argc, char** argv)
     { NULL, 0, NULL, 0 }
   };
 
-  while ((c = getopt_long(argc, argv, "cfshqtrvLC:X:YZH:VS", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "cfshqtrvLC:X:H:VS", longopts, NULL)) != -1)
     {
       oss1 <<" -"<<(char)c;
       switch (c) {

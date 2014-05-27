@@ -22,7 +22,7 @@ class Parser: public ParserBase
 
         typedef double valueT;
         int line_num = 1;
-        bool testing = true;
+        bool testing = false;
         bool verbatim = false;
         bool run = true;
         bool wasEQ = false;

@@ -27,8 +27,8 @@ using namespace std;
 
 void version()
 {
-  cout <<"      NewBioDiVinE ";
-  cout <<"version 1.0 build 1  (2014/May/5 16:00)"<<endl;
+  cout <<"      BioDiVinE ";
+  cout <<"version 1.1 build 1  (2014/May/5 16:00)"<<endl;
 }
 
 
@@ -48,57 +48,28 @@ void cli_usage()
   cout <<"    owcty_reversed\n\n";
   
   cout <<"Options: "<<endl;
-  cout <<"  For owcty:\n";
-  cout <<"      -v,--version       show version"<<endl;
-  cout <<"      -h,--help          show this help"<<endl;
-  cout <<"      -H x,--htsize x    set the size of hash table to ( x<33 ? 2^x : x )"<<endl;
-  cout <<"      -V,--verbose       print some statistics"<<endl;
-  cout <<"      -q,--quiet         quite mode"<<endl;
-  cout <<"      -f, --fast         use faster but less accurate algorithm for abstraction" << endl;  
-  cout <<"      -c, --statelist    show counterexample states"<<endl;
+  cout <<"      -v,   --version    show algorithm version"<<endl;
+  cout <<"      -h,   --help       show algorithm help"<<endl;
+  cout <<"      -q,   --quiet      quite mode"<<endl;
+//  cout <<"      -f,   --fast       use faster but less accurate algorithm for abstraction" << endl;  
+  cout <<"      -c,   --statelist  show counterexample states"<<endl;
+  cout <<"      -t,   --trail      produce trail file"<<endl;
+  cout <<"      -r,   --report     produce report file"<<endl;
+  cout <<"      -L,   --log        perform logging"<<endl;
+  cout <<"      -H x, --htsize x   set the size of hash table to ( x<33 ? 2^x : x )"<<endl;
+  cout <<"      -X w               sets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
+  cout <<"      -V,  --verbose     print some statistics"<<endl;
+  cout << endl;
+  
+  cout <<"  special options for owcty:\n";
   cout <<"      -C x,--compress x  set state compression method"<<endl;
   cout <<"                         (0 = no compression, 1 = Huffman static compression)"<<endl;
-  cout <<"      -t,--trail         produce trail file"<<endl;
-  cout <<"      -r,--report        produce report file"<<endl;
-  cout <<"      -s,--simple        perform simple reachability only"<<endl;
-  cout <<"      -L,--log           produce logfiles (log period is 1 second)"<<endl;
-  cout <<"      -X w               sets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
-  cout <<"      -Y                 reserved for GUI"<<endl;
-  cout <<"      -Z                 reserved for GUI"<<endl;
+  cout <<"      -s,  --simple      perform simple reachability only"<<endl;
   cout << endl;
   
-  cout <<"  For distr_map:\n";
-  cout <<"      -v, --version      show distr_map version"<<endl;
-  cout <<"      -h, --help         show this help"<<endl;
-  cout <<"      -r, --report       produce report (file.distr_map.report)"<<endl;
-  cout <<"      -t, --trail        produce trail file (file.distr_map.trail)"<<endl;
-  cout <<"      -c, --statelist    show counterexample states"<<endl;
-  cout <<"      -f, --fast         use faster but less accurate algorithm for abstraction" << endl;
-  cout <<"      -H x, --htsize x   set the size of hash table to ( x<33 ? 2^x : x )"<<endl;
-  cout <<"      -S, --printstats   print some statistics"<<endl;
-  cout <<"      -q, --quiet        quiet mode (do not print anything - overrides all except -h and -v)"<<endl;
-  cout <<"      -L                 perform logging"<<endl;
-  cout <<"      -X w               sets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
-  cout <<"      -Y                 reserved for GUI"<<endl;
-  cout <<"      -Z                 reserved for GUI"<<endl;  
-  cout << endl;
-  
-  cout <<"  For owcty_reversed:\n";
-  cout <<"      -v, --version      show version"<<endl;
-  cout <<"      -h, --help         show this help"<<endl;
-  cout <<"      -H x, --htsize x   set the size of hash table to ( x<33 ? 2^x : x )"<<endl;
-  cout <<"      -V, --verbose      print some statistics"<<endl;
-  cout <<"      -q, --quiet        quite mode"<<endl;
-  cout <<"      -c, --statelist    show counterexample states"<<endl;
-  cout <<"      -t, --trail        produce trail file"<<endl;
-  cout <<"      -f, --fast         use faster but less accurate algorithm for abstraction" << endl;
-  cout <<"      -r, --report       produce report file"<<endl;
+  cout <<"  special options for owcty_reversed:\n";
   cout <<"      -R, --remove       removes transitions while backpropagating (very slow, saves memory)" << endl;
   cout <<"      -s, --simple       perform simple reachability only"<<endl;
-  cout <<"      -L, --log          produce logfiles (log period is 1 second)"<<endl;
-  cout <<"      -X w               sets base name of produced files to w (w.trail,w.report,w.00-w.N)"<<endl;
-  cout <<"      -Y                 reserved for GUI"<<endl;
-  cout <<"      -Z                 reserved for GUI"<<endl;
   cout <<"-----------------------------------------------------------------"<<endl;
 }
 
@@ -116,7 +87,7 @@ void maintenance(char ** array) {
 
 int main(int argc, char** argv) {
 	
-	bool dbg = true;
+	bool dbg = false;
 
 	if( argc < 4 || (argc >= 2 && (string(argv[1]).compare("-h") == 0 || string(argv[1]).compare("--help") == 0) ) ) {
 		cli_usage();
@@ -289,7 +260,12 @@ int main(int argc, char** argv) {
 				}
 		}
 	
-		//TODO: maybe remove the combined file then
+		string removeCMD = "rm ";
+		removeCMD += name;
+		if(dbg) cout << "Removing file " << name << "\n";
+		if(system(removeCMD.c_str()) == -1) {
+			cerr << "\nError: Can't remove temporaly file " << name << "\n";
+		}
 		
 
 	} //Here ends cycle for all previously generated files, that was input files for chosen algorithm
@@ -297,7 +273,7 @@ int main(int argc, char** argv) {
 
 
 	cout << "==================================================\n";
-	cout << "--------- NewBioDiVinE successfully finish ---------\n";
+	cout << "-------- NewBioDiVinE successfully finish --------\n";
 	cout << "==================================================\n\n";
 						
 	maintenance(newArgv);

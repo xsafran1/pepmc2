@@ -19,10 +19,6 @@ nobase_pkginclude_HEADERS = sevine.h divine.h \
 				 system/system.hh \
 				 system/system_trans.hh \
 				 system/transition.hh \
-                         system/prob_transition.hh \
-                         system/prob_process.hh \
-                         system/prob_system.hh \
-                         system/prob_explicit_system.hh \
                          storage/compressor.hh \
 						 storage/huffman.cc \
 						 storage/huffman.hh \

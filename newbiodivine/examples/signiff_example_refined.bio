@@ -14,4 +14,3 @@ INIT: A:7,10; B:0.0001,3; C:7,10; D:0.0001,3
 
 system async;
 
-//SIGNIFICANCE: 0.4
